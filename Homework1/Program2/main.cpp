@@ -1,10 +1,12 @@
 /************************************************************************
- * Author: Cole Barbes and Harrison Colborne
- * Creation Date: 8/30/23
- * Last Update: 8/30/23
+ * Author: Cole Barbes 
+ * Creation Date: 9/03/23
+ * Last Update: 9/03/23
  ************************************************************************/
 #include <iostream>
 #include <chrono>
+#include <ctime>
+
 
 
 using namespace std::chrono;
@@ -24,6 +26,7 @@ bool Sorted(t *, int n);
 
 int main(){
 
+	srand(time(0));
 	int ArrSize = 0; // init the array size
 
 	// take input from the user
@@ -31,13 +34,13 @@ int main(){
 	cin>>ArrSize;
 
 	// initialize the array dynamically
-	int *randArray = new int[ArrSize];
+	double *randArray = new double[ArrSize];
 
-	// loop through array and initialize all values to random number between -1000 and 1000
+	// loop through array and initialize all values to random number between [0, 1)
 	for(int i = 0; i<ArrSize; i++){
-		randArray[i] = (rand()%2001)-1000;
+		randArray[i] = (static_cast<double>(rand())/static_cast<double>(RAND_MAX));
 	}
-        
+
 	// time a the sorting process
 	auto start = high_resolution_clock::now();
 	// Process to be timed.
@@ -52,7 +55,7 @@ int main(){
 	else 
 	{
 		cout<< "Sorted"<<endl;
-	}
+	}	
 	
 	delete [] randArray;
 

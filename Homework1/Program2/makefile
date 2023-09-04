@@ -1,9 +1,9 @@
-# This file was created by: Cole Barbes on 02/16/23
+# This file was created by: Cole Barbes on 09/03/23
 
-PROG = prog1
+PROG = prog2
 CC = g++
 CPPFLAGS = -g -Wall -std=c++11
-OBJS =  main.o
+OBJS = main.o
 
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
