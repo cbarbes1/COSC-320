@@ -12,15 +12,15 @@ using namespace std;
 
 // templated function to swap 2 values in an array
 template<class t>
-void swap(t *, int, int);
+void swap(t**, int, int);
 
 // templated function to sort an array
 template<class t>
-void Sort(t *, int);
+void Sort(t**, int);
 
 // templated function to check if an array is sorted
 template<class t>
-bool Sorted(t *, int n);
+bool Sorted(t**, int n);
 
 int main(){
 
@@ -31,13 +31,13 @@ int main(){
 	cin>>ArrSize;
 
 	// initialize the array dynamically
-	int *randArray = new int[ArrSize];
+	int** randArray = new int*[ArrSize];
 
 	// loop through array and initialize all values to random number between -1000 and 1000
 	for(int i = 0; i<ArrSize; i++){
-		randArray[i] = (rand()%2001)-1000;
+		randArray[i] = new int((rand()%2001)-1000);
 	}
-        
+        	       
 	// time a the sorting process
 	auto start = high_resolution_clock::now();
 	// Process to be timed.
@@ -54,6 +54,10 @@ int main(){
 		cout<< "Array is Sorted"<<endl;
 	}
 	
+	for(int i = 0; i<ArrSize; i++){
+		delete randArray[i];
+	}
+
 	delete [] randArray;
 
 	return 0;
@@ -64,10 +68,10 @@ int main(){
 *  Parameters: The array, The first index, The second index
 ***************************************************************/
 template<class t>
-void swap(t *arr, int n1, int n2){
-	t temp = arr[n1];
-	arr[n1] = arr[n2];
-	arr[n2] = temp;
+void swap(t** arr, int n1, int n2){
+	t *temp = *(arr+n1);
+	*(arr+n1) = *(arr+n2);
+	*(arr+n2) = temp;
 }
 
 /**********************************************************************
@@ -75,14 +79,14 @@ void swap(t *arr, int n1, int n2){
  *  Parameters: the array and the size
  *********************************************************************/
 template<class t>
-void Sort(t *arr, int n){
+void Sort(t** arr, int n){
 	int i, minIdx = 0;
 	
 	for(i = 0; i<n; i++){
 
 		minIdx = i; // set the target 
 		for(int j = i; j<n; j++){
-			if(arr[j] < arr[minIdx]){
+			if(*(*(arr+j)) < *(*(arr+minIdx))){
 				minIdx = j;// find the swap
 			}
 		}
@@ -98,11 +102,11 @@ void Sort(t *arr, int n){
  * Parameters: the array and the size
  **********************************************************************/
 template<class t>
-bool Sorted(t *arr, int n){
+bool Sorted(t** arr, int n){
 
 	bool checker = true;
 	for(int i = 0; i<n-1; i++){
-		if(arr[i] > arr[i+1])
+		if(*(*(arr+i)) > *(*(arr+(i+1))))
 			checker = false;
 	}
 

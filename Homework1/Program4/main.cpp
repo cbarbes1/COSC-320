@@ -5,7 +5,8 @@
  ************************************************************************/
 #include <iostream>
 #include <chrono>
-
+#include "Thing.h"
+#include <ctime>
 
 using namespace std::chrono;
 using namespace std;
@@ -24,6 +25,7 @@ bool Sorted(t *, int n);
 
 int main(){
 
+	srand(time(0));
 	int ArrSize = 0; // init the array size
 
 	// take input from the user
@@ -31,12 +33,13 @@ int main(){
 	cin>>ArrSize;
 
 	// initialize the array dynamically
-	int *randArray = new int[ArrSize];
+	Thing *randArray = new Thing[ArrSize];
 
 	// loop through array and initialize all values to random number between -1000 and 1000
 	for(int i = 0; i<ArrSize; i++){
-		randArray[i] = (rand()%2001)-1000;
+		randArray[i].set(rand()%2000, rand()%2000);
 	}
+	
         
 	// time a the sorting process
 	auto start = high_resolution_clock::now();

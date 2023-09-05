@@ -7,8 +7,6 @@
 #include <chrono>
 #include <ctime>
 
-
-
 using namespace std::chrono;
 using namespace std;
 
@@ -18,7 +16,7 @@ void swap(t *, int, int);
 
 // templated function to sort an array
 template<class t>
-void Sort(t, int);
+void Sort(t *, int);
 
 // templated function to check if an array is sorted
 template<class t>
@@ -50,11 +48,11 @@ int main(){
 	cout << "Time to sort: " << duration.count() / 1000000.0 << " seconds" << endl;
 
 	if(!Sorted(randArray, ArrSize)){
-		cout<<"Not Sorted"<<endl;
+		cout<<"Array is Not Sorted"<<endl;
 	}
 	else 
 	{
-		cout<< "Sorted"<<endl;
+		cout<< "Array is Sorted"<<endl;
 	}	
 	
 	delete [] randArray;
@@ -78,7 +76,7 @@ void swap(t *arr, int n1, int n2){
  *  Parameters: the array and the size
  *********************************************************************/
 template<class t>
-void Sort(t arr, int n){
+void Sort(t *arr, int n){
 	int i, minIdx = 0;
 	
 	for(i = 0; i<n; i++){

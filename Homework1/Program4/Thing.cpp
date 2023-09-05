@@ -72,7 +72,7 @@ void Thing::set(int first, int second)
  * Parameters: the other "Thing"
  * Return: true if A*X.B = B*X.A
 */
-bool Thing::operator==(const Thing other)
+bool Thing::operator==(const Thing &other)
 {
     return (A*other.B) == (B*other.A);
 }
@@ -82,7 +82,7 @@ bool Thing::operator==(const Thing other)
  * Parameters: the other "Thing"
  * Return: true if A*X.B != B*X.A
 */
-bool Thing::operator!=(const Thing other)
+bool Thing::operator!=(const Thing &other)
 {
     return (A*other.B) != (B*other.A);
 }
@@ -92,9 +92,9 @@ bool Thing::operator!=(const Thing other)
  * Parameters: the other "Thing"
  * Return: true if A*X.B < B*X.A
 */
-bool Thing::operator<(const Thing other)
+bool Thing::operator<(const Thing &other)
 {
-    return (A*other.B) < (B*other.A);
+    return ((A*other.B) < (B*other.A));
 }
 
 /*
@@ -102,9 +102,9 @@ bool Thing::operator<(const Thing other)
  * Parameters: the other "Thing"
  * Return: true if A*other.B > B*other.A
 */
-bool Thing::operator>(const Thing other)
+bool Thing::operator>(const Thing &other)
 {
-    return (A*other.B) > (B*other.A);
+    return ((A*other.B) > (B*other.A));
 }
 
 /*
@@ -113,9 +113,9 @@ bool Thing::operator>(const Thing other)
  * Return true if A*other.B <= B*other.B
  *
 */
-bool Thing::operator<=(const Thing other)
+bool Thing::operator<=(const Thing &other)
 {
-    return (A*other.B) <= (B*other.A);
+    return ((A*other.B) <= (B*other.A));
 }
 
 /*
@@ -123,11 +123,10 @@ bool Thing::operator<=(const Thing other)
  * Parameters: the other "Thing"
  * Return true if A*other.B >= B*other.B 
 */
-bool Thing::operator>=(const Thing other)
+bool Thing::operator>=(const Thing &other)
 {
-    return (A*other.B) >= (B*other.A);
+    return ((A*other.B) >= (B*other.A));
 }
-
 /*
  * Description: Overload the print statement to print the values of A and B
  * Parameters: The stream and the output thing
