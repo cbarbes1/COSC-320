@@ -9,8 +9,8 @@ template<class T>
 class ListNode{
 	public:
 		T value;
-		ListNode* next;
-		ListNode* previous;
+		ListNode<T>* next;
+		ListNode<T>* previous;
 		ListNode(){
 			next = nullptr;
 			previous = nullptr;
@@ -21,8 +21,8 @@ class ListNode{
 template<class T>
 class Thing1{
 	protected:
-		ListNode* head;
-		ListNode* tail;
+		ListNode<T>* head;
+		ListNode<T>* tail;
 	public:
 		Thing1();
 		~Thing1();
@@ -39,57 +39,65 @@ class Thing1{
 		bool isempty();
 		T getValue(int);
 		void setValue(int, T);
-		friend ostream& operator<<(ostream&, Thing1&);
+		template<class C>
+		friend ostream& operator<<(ostream&, Thing1<C>&);
 };
 
-Thing1::Thing1()
+template<class T>
+Thing1<T>::Thing1()
 {
-	head = nullptr;
-	tail = nullptr;
-}
-
-~Thing1::Thing1()
-{
-	clear();
+head = nullptr;
+tail = nullptr;
 }
 
 template<class T>
-void pushback(T var)
+Thing1<T>::~Thing1()
 {
-	ListNode* tempNode = new ListNode();
-	tempNode.value = var;
+clear();
+}
+
+template<class T>
+void Thing1<T>::pushback(T var)
+{
+	ListNode<T>* tempNode = new ListNode<T>();
+	tempNode->value = var;
+
 	if(!head){
 		head = tempNode;
+		tail = tempNode;
 	}
-	else{
+	else{	
 		tail->next = tempNode;
-		tail->previous = tail;
+		tempNode->previous = tail;
 		tail = tempNode;
 	}
 }
 
 template<class T>
-T popback()
+T Thing1<T>::popback()
 {
 	if(!head){
-		return new T();
+		T temp;
+		return temp;
 	}
 	else{
 		T temp = tail->value;
-		ListNode* tempNode = tail;
-		tail = tail.previous;
+		ListNode<T>* tempNode = tail;
+		tail = tail->previous;
 		delete tempNode;
+		tail->next = nullptr;
+		return temp;
 	}
 }
 
 template<class T>
-void pushfront(T var)
+void Thing1<T>::pushfront(T var)
 {
 	if(!head){
-		head = new ListNode(var);
+		head = new ListNode<T>(var);
 	}
 	else{
-		ListNode* tempNode = new ListNode(var);
+		ListNode<T>* tempNode = new ListNode<T>(var);
 		tempNode->next = head;
 		head->previous = tempNode;
 		head = tempNode;
@@ -97,24 +105,27 @@ void pushfront(T var)
 }
 
 template<class T>
-T popfront()
+T Thing1<T>::popfront()
 {
 	if(!head){
-		return new T();
+		T temp;
+		return temp;
 	}
 	else{
-		ListNode* tempNode = head->next;
+		ListNode<T>* tempNode = head->next;
 		T temp = head->value;
 		delete head;
+		head = tempNode;
 		return temp;
 	}
 }
 
-int size()
+template<class T>
+int Thing1<T>::size()
 {
-	int count;
+	int count = 0;
 
-	ListNode* nodePtr = head;
+	ListNode<T>* nodePtr = head;
 
 	while(nodePtr){
 		count++;
@@ -124,59 +135,148 @@ int size()
 	return count;
 }
 
-void clear()
+template<class T>
+void Thing1<T>::clear()
 {
-	ListNode* nodePtr = head;
-	ListNode* nextNode = head->next;
-
+	ListNode<T>* nodePtr = head;
+	ListNode<T>* tempPtr;
 	while(nodePtr){
+		tempPtr = nodePtr->next;
 		delete nodePtr;
-		nodePtr = nextNode;
-		nextNode = nodePtr->next;
+		nodePtr = tempPtr;
 	}
 
 }
 
-void printforward(bool print)
+template<class T>
+void Thing1<T>::printforward(bool print)
 {
+	ListNode<T>* nodePtr = head;
+
+	while(nodePtr){
+		if(print){
+			cout<<nodePtr->value<<endl;
+		}
+		else{
+			cout<<nodePtr->value<<" ";
+		}
+		nodePtr = nodePtr->next;
+	}
+
+	cout<<endl;
 	
 }
 
-void printbackward(bool print)
+template<class T>
+void Thing1<T>::printbackward(bool print)
 {
+	ListNode<T>* nodePtr = tail;
+
+	while(nodePtr){
+		if(print){
+			cout<<nodePtr->value<<endl;
+		}
+		else{
+			cout<<nodePtr->value<<" ";
+		}
+		nodePtr = nodePtr->previous;
+	}
+
+	cout<<endl;
 
 }
 
 template<class T>
-bool find(T val)
+bool Thing1<T>::find(T val)
 {
+	ListNode<T>* nodePtr = head;
+
+	while(nodePtr->value != val && nodePtr != tail){
+		nodePtr = nodePtr->next;
+	}
+	return nodePtr->value == val;
+	
+}
+
+template<class T>
+int Thing1<T>::findpos(T val)
+{
+	ListNode<T>* nodePtr = head;
+
+	int count = 0;
+
+	while(nodePtr->value != val && nodePtr != tail){
+		nodePtr = nodePtr->next;
+		count++;
+	}
+	if(nodePtr->value==val){
+		return count;
+	}
+	else {
+		return -1;
+	}
 
 }
 
 template<class T>
-int findpos(T val)
+bool Thing1<T>::isempty()
 {
-
+	return (!head);
 }
 
-bool isempty()
+template<class T>
+T Thing1<T>::getValue(int pos)
 {
+	int count = 0;
+
+	ListNode<T>* nodePtr = head;
+
+	while(nodePtr && count != pos){
+		nodePtr = nodePtr->next;
+		count++;
+	}
+
+
+	if(count == pos){
+		return nodePtr->value;
+	}
+
+	else {
+		T temp;
+		return temp;
+	}
+}
+
+template<class T>
+void Thing1<T>::setValue(int pos, T var)
+{
+	int count = 0;
+
+	ListNode<T>* nodePtr = head;
+
+	while(nodePtr && count != pos){
+		nodePtr = nodePtr->next;
+		count++;
+	}
+
+	if(count == pos){
+		nodePtr->value = var;
+	}
 
 }
 
 template<class T>
-T getValue(int pos)
+ostream& operator<<(ostream& strm, Thing1<T> &output)
 {
+	ListNode<T>* nodePtr = output.head;
 
+	while(nodePtr){
+		strm<<nodePtr->value<<" ";
+		nodePtr = nodePtr->next;
+	}
+
+	return strm;
 }
 
-template<class T>
-void setValue(int pos, T var)
-{
 
-}
-
-ostream& operator<<(ostream& strm, Thing1& output)
-{
-
-}
+#endif

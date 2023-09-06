@@ -12,7 +12,6 @@ main.o : main.cpp
 
 clean:
 	rm -f core $(PROG) $(OBJS)
-	rm outPutFile.csv
 
 rebuild:
 	make clean

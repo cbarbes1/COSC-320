@@ -13,6 +13,7 @@ int main() {
     Thing1<int> list1;
     Thing2<int> list2;
 
+
     list1.pushback(5);
     list1.pushback(7);
     list1.pushback(2);
