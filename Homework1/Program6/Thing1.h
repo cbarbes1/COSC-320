@@ -77,7 +77,7 @@ template<class T>
 T Thing1<T>::popback()
 {
 	if(!head){
-		T temp;
+		T temp = T();
 		return temp;
 	}
 	else{
@@ -94,10 +94,11 @@ template<class T>
 void Thing1<T>::pushfront(T var)
 {
 	if(!head){
-		head = new ListNode<T>(var);
+		head->value = var;
 	}
 	else{
-		ListNode<T>* tempNode = new ListNode<T>(var);
+		ListNode<T>* tempNode = new ListNode<T>();
+		tempNode->value = var;
 		tempNode->next = head;
 		head->previous = tempNode;
 		head = tempNode;
@@ -108,14 +109,17 @@ template<class T>
 T Thing1<T>::popfront()
 {
 	if(!head){
-		T temp;
+		T temp = T();
 		return temp;
 	}
 	else{
-		ListNode<T>* tempNode = head->next;
+		ListNode<T>* tempNode = head;
 		T temp = head->value;
-		delete head;
-		head = tempNode;
+		head = head->next;
+		delete tempNode;
+		if(!head){
+			tail = nullptr;
+		}
 		return temp;
 	}
 }
@@ -145,6 +149,8 @@ void Thing1<T>::clear()
 		delete nodePtr;
 		nodePtr = tempPtr;
 	}
+	head = nullptr;
+	tail = nullptr;
 
 }
 
@@ -242,7 +248,7 @@ T Thing1<T>::getValue(int pos)
 	}
 
 	else {
-		T temp;
+		T temp = T();
 		return temp;
 	}
 }

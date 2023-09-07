@@ -16,10 +16,10 @@ class Thing2: public Thing1<T>{
 		~Thing2();
 		void resetIteratorToFront();
 		void resetIteratorToBack();
-		Thing2<T>& operator++();
-		Thing2<T> operator++(int);
-		Thing2<T>& operator--();
-		Thing2<T> operator--(int);
+		void operator++();
+		void operator++(int);
+		void operator--();
+		void operator--(int);
 		void operator+=(int);
 		void operator-=(int);
 		T get();
@@ -51,43 +51,39 @@ void Thing2<T>::resetIteratorToBack()
 }
 
 template<class T>
-Thing2<T>& Thing2<T>::operator++()
+void Thing2<T>::operator++()
 {
 	if(iter->next){
 		iter = iter->next;
 	}
-	return *this;
+	
 }
 
 template<class T>
-Thing2<T> Thing2<T>::operator++(int)
+void Thing2<T>::operator++(int)
 {
-	Thing2<T> temp = *this;
 	if(iter->next){
 		iter = iter->next;
 	}
-
-	return temp;
+	
 }
 
 
 template<class T>
-Thing2<T>& Thing2<T>::operator--()
+void Thing2<T>::operator--()
 {
 	if(iter->previous){
-		iter = iter->next;
+		iter = iter->previous;
 	}
-	return *this;
 }
 
 template<class T>
-Thing2<T> Thing2<T>::operator--(int)
+void Thing2<T>::operator--(int)
 {
-	Thing2<T> temp = *this;
-	if(iter->next){
-		iter = iter->next;
+	if(iter->previous){
+		iter = iter->previous;
 	}
-	return temp;
+	
 }
 
 
@@ -128,22 +124,32 @@ void Thing2<T>::insertval(T var)
 	nodePtr->value = var;
 
 	tempPtr = iter->next;
-	tempPtr->previous = nodePtr;
 	iter->next = nodePtr;
+	nodePtr->previous = iter;
+	nodePtr->next = tempPtr;
 
 }
 
 template<class T> 
 void Thing2<T>::deleteval()
 {
-	if(iter){
-		ListNode<T>* nodePtr;
-
-		nodePtr = iter->next;
-
-		nodePtr->previous = iter->previous;
+	if(!iter->next){
+		Thing1<T>::tail = Thing1<T>::tail->previous;
+		Thing1<T>::tail->next = nullptr;
 
 		delete iter;
+		iter = Thing1<T>::head;
+	}
+	else{
+		ListNode<T>* nodePtr;
+		ListNode<T>* previousNode;
+
+		previousNode = iter->previous;
+		nodePtr = iter->next;
+		previousNode->next = nodePtr;
+		nodePtr->previous = previousNode;
+		delete iter;
+		iter = Thing1<T>::head;
 	}
 }
 
