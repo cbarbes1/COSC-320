@@ -1,6 +1,6 @@
 # This file was created by: Cole Barbes on 02/16/23
 
-PROG = prog3
+PROG = prog4
 CC = g++
 CPPFLAGS = -g -Wall -std=c++11
 OBJS =  main.o Thing.o
