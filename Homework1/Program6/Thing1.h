@@ -135,7 +135,10 @@ template<class T>
 void Thing1<T>::pushfront(T var)
 {
 	if(!head){ // if empty place value at the head
-		head->value = var;
+		ListNode<T>* tempNode = new ListNode<T>();
+		tempNode->value = var;
+		head = tempnode;
+		tail = tempnode;
 		
 	}
 	else{ // push the value to the front shifting the head to it
