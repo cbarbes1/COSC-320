@@ -2,8 +2,11 @@
 #ifndef INTBINARYTREE_H
 #define INTBINARYTREE_H
 
+#include <iostream>
 #include <queue>
 #include <cmath>
+
+using namespace std;
 
 class IntBinaryTree {
 private:
@@ -23,7 +26,7 @@ private:
 	void displayPostOrder(TreeNode*) const;
 	void IndentBlock(int);
 	void PrintTree(TreeNode*, int, int);
-	void buildTree(TreeNode*, queue<int>, int, int, int);
+	void buildTree(TreeNode*, queue<int> p, int, int, int);
 public:
 	// Constructor
 	IntBinaryTree() {
@@ -51,10 +54,8 @@ public:
 
 	int maxValue(int *A, int sz);
 
-	void buildTree(int *A, int sz);
-
 	void LoadArray(int *A, int sz);
 
-	void ReturnSortedArray(int *A, int sz);
+	//void ReturnSortedArray(int *A, int sz);
 };
 #endif

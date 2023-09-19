@@ -18,20 +18,6 @@ void IntBinaryTree::destroySubTree(TreeNode *nodePtr) {
 	}
 }
 
-//********************************************
-// deleteNode deletes the node whose value   *
-// member is the same as num.                *
-//********************************************
-
-void IntBinaryTree::deleteNode(int num, TreeNode *&nodePtr) {
-	if (num < nodePtr->value)
-		deleteNode(num, nodePtr->left);
-	else if (num > nodePtr->value)
-		deleteNode(num, nodePtr->right);
-	else
-		makeDeletion(nodePtr);
-}
-
 //***********************************************************
 // makeDeletion takes a reference to a pointer to the node  *
 // that is to be deleted. The node is removed and the       *
@@ -161,41 +147,28 @@ int IntBinaryTree::maxValue(int *A, int sz)
 	return (max+1);
 }
 
-/* 
- * setup function for the recursive tree builder function
- * Take the array and its size as a parameter and make a queue with the data
- * start the recursion
- */
-void IntBinaryTree::buildTree(int *A, int sz)
-{
-	queue<int> varList;
-	for(int i = 0; i<sz; i++)
-		varList.push(*(A+i));
-	buildTree(root, varList, 0, maxValue(A, sz), ceil(log2(sz))+1);
-}
 
 /* Build the tree recursively
  *
  */
-void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<int> varList, int height, int maxVar, int h)
+void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<TreeNode*> varList, int height, int maxVar, int h)
 {
 	if(height == h){ // if depth is reached then setup nodes accordingly
 		if(!varList.empty()){ // if the queue is not empty place value
-			TreeNode *newNode = new TreeNode();
-			newNode->value = varList.front();
+			TreeNode *newNode = varList.front();
 			varList.pop();
 		}
 		else { // when queue is empty set to the max var
 			TreeNode *newNode = new TreeNode();
 			newNode->value = maxVar;
 		}
-
 	}
 	else if(height != h){ // if still in null nodes recurse
 		nodePtr = new TreeNode();
 		nodePtr->value = -1;
-		buildTree(nodePtr->left, varList, ++height, maxVar, h); // left recursive step
-		buildTree(nodePtr->right, varList, ++height, maxVar, h); // right recursive step
+		height++;
+		buildTree(nodePtr->left, varList, height++, maxVar, h); // left recursive step
+		buildTree(nodePtr->right, varList, height++, maxVar, h); // right recursive step
 	}
 }
 
@@ -204,16 +177,24 @@ void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<int> varList, int height,
  * 2 parameters: the array and the size
  */
 void IntBinaryTree::LoadArray(int *A, int sz)
-{
-	buildTree(A, sz);
+{	
+	queue<TreeNode*> varList;
+	for(int i = 0; i<sz; i++){
+		TreeNode *node = new TreeNode();
+		node->value = *(A+1);
+		varList.push(node);
+	}
+	buildTree(root, varList, 0, maxValue(A, sz), ceil(log2(sz))+1);
 }
 
-void ReturnSortedArray(int *A, int sz)
+//void IntBinaryTree::
+
+/*void ReturnSortedArray(int *A, int sz)
 {
 	TreeNode *nodePtr = root;
-	TreeNode *leftNode = nodePtr->left;
+	TreeNode *tmp = nodePtr->left;
 
 	while(nodePtr->value == -1){
-
+*/
 //EOF
 //
