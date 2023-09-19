@@ -2,6 +2,9 @@
 #ifndef INTBINARYTREE_H
 #define INTBINARYTREE_H
 
+#include <queue>
+#include <cmath>
+
 class IntBinaryTree {
 private:
 	struct TreeNode {
@@ -13,15 +16,14 @@ private:
 	TreeNode *root;
 
 	// Private member functions
-	void insert(TreeNode*&, TreeNode*&);
 	void destroySubTree(TreeNode*);
-	void deleteNode(int, TreeNode*&);
 	void makeDeletion(TreeNode*&);
 	void displayInOrder(TreeNode*) const;
 	void displayPreOrder(TreeNode*) const;
 	void displayPostOrder(TreeNode*) const;
 	void IndentBlock(int);
 	void PrintTree(TreeNode*, int, int);
+	void buildTree(TreeNode*, queue<int>, int, int, int);
 
 public:
 	// Constructor
@@ -33,11 +35,6 @@ public:
 	~IntBinaryTree() {
 		destroySubTree(root);
 	}
-
-	// Binary tree operations
-	void insertNode(int);
-	bool searchNode(int);
-	void remove(int);
 
 	void displayInOrder() const {
 		displayInOrder(root);
@@ -54,6 +51,8 @@ public:
 	void PrintTree(int Indent = 4, int Level = 0);
 
 	int maxValue(int *A, int sz);
+
+	void buildTree(int *A, int sz);
 
 	void LoadArray(int *A, int sz);
 

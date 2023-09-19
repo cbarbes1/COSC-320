@@ -3,38 +3,6 @@
 #include "IntBinaryTree.h"
 using namespace std;
 
-//*************************************************************
-// insert accepts a TreeNode pointer and a pointer to a node. *
-// The function inserts the node into the tree pointed to by  *
-// the TreeNode pointer. This function is called recursively. *
-//*************************************************************
-
-void IntBinaryTree::insert(TreeNode *&nodePtr, TreeNode *&newNode) {
-	if (nodePtr == nullptr)
-		nodePtr = newNode;                  // Insert the node.
-	else if (newNode->value < nodePtr->value)
-		insert(nodePtr->left, newNode);     // Search the left branch
-	else
-		insert(nodePtr->right, newNode);    // Search the right branch
-}
-
-//**********************************************************
-// insertNode creates a new node to hold num as its value, *
-// and passes it to the insert function.                   *
-//**********************************************************
-
-void IntBinaryTree::insertNode(int num) {
-	TreeNode *newNode = nullptr;	// Pointer to a new node.
-
-	// Create a new node and store num in it.
-	newNode = new TreeNode;
-	newNode->value = num;
-	newNode->left = newNode->right = nullptr;
-
-	// Insert the node.
-	insert(root, newNode);
-}
-
 //***************************************************
 // destroySubTree is called by the destructor. It   *
 // deletes all nodes in the tree.                   *
@@ -48,35 +16,6 @@ void IntBinaryTree::destroySubTree(TreeNode *nodePtr) {
 			destroySubTree(nodePtr->right);
 		delete nodePtr;
 	}
-}
-
-//***************************************************
-// searchNode determines if a value is present in   *
-// the tree. If so, the function returns true.      *
-// Otherwise, it returns false.                     *
-//***************************************************
-
-bool IntBinaryTree::searchNode(int num) {
-	TreeNode *nodePtr = root;
-
-	while (nodePtr) {
-		if (nodePtr->value == num)
-			return true;
-		else if (num < nodePtr->value)
-			nodePtr = nodePtr->left;
-		else
-			nodePtr = nodePtr->right;
-	}
-	return false;
-}
-
-//**********************************************
-// remove calls deleteNode to delete the       *
-// node whose value member is the same as num. *
-//**********************************************
-
-void IntBinaryTree::remove(int num) {
-	deleteNode(num, root);
 }
 
 //********************************************
@@ -222,14 +161,59 @@ int IntBinaryTree::maxValue(int *A, int sz)
 	return (max+1);
 }
 
+/* 
+ * setup function for the recursive tree builder function
+ * Take the array and its size as a parameter and make a queue with the data
+ * start the recursion
+ */
+void IntBinaryTree::buildTree(int *A, int sz)
+{
+	queue<int> varList;
+	for(int i = 0; i<sz; i++)
+		varList.push(*(A+i));
+	buildTree(root, varList, 0, maxValue(A, sz), ceil(log2(sz))+1);
+}
+
+/* Build the tree recursively
+ *
+ */
+void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<int> varList, int height, int maxVar, int h)
+{
+	if(height == h){ // if depth is reached then setup nodes accordingly
+		if(!varList.empty()){ // if the queue is not empty place value
+			TreeNode *newNode = new TreeNode();
+			newNode->value = varList.front();
+			varList.pop();
+		}
+		else { // when queue is empty set to the max var
+			TreeNode *newNode = new TreeNode();
+			newNode->value = maxVar;
+		}
+
+	}
+	else if(height != h){ // if still in null nodes recurse
+		nodePtr = new TreeNode();
+		nodePtr->value = -1;
+		buildTree(nodePtr->left, varList, ++height, maxVar, h); // left recursive step
+		buildTree(nodePtr->right, varList, ++height, maxVar, h); // right recursive step
+	}
+}
+
 /*
  * Take an array of integers of size sz and create a tree with all the values at the bottom
  * 2 parameters: the array and the size
  */
 void IntBinaryTree::LoadArray(int *A, int sz)
 {
-	int max	= maxValue(A, sz);
+	buildTree(A, sz);
+}
 
+void ReturnSortedArray(int *A, int sz)
+{
+	TreeNode *nodePtr = root;
+	TreeNode *leftNode = nodePtr->left;
 
+	while(nodePtr->value == -1){
 
-
+//EOF
+//
