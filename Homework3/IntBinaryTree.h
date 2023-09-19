@@ -24,7 +24,6 @@ private:
 	void IndentBlock(int);
 	void PrintTree(TreeNode*, int, int);
 	void buildTree(TreeNode*, queue<int>, int, int, int);
-
 public:
 	// Constructor
 	IntBinaryTree() {
@@ -56,6 +55,6 @@ public:
 
 	void LoadArray(int *A, int sz);
 
-	void ReturnSortedtArray(int *A, int sz);
+	void ReturnSortedArray(int *A, int sz);
 };
 #endif
