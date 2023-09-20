@@ -10,10 +10,10 @@ using namespace std;
 
 class IntBinaryTree {
 private:
-	struct TreeNode {
+	struct TreeNode{
 		int value;
-		TreeNode *left;
-		TreeNode *right;
+		TreeNode* left;
+		TreeNode* right;
 	};
 
 	TreeNode *root;
@@ -26,7 +26,8 @@ private:
 	void displayPostOrder(TreeNode*) const;
 	void IndentBlock(int);
 	void PrintTree(TreeNode*, int, int);
-	void buildTree(TreeNode*, queue<int> p, int, int, int);
+	void buildTree(TreeNode*&, queue<int> &p, int, int, int);
+	TreeNode* minTree(TreeNode*&, int);
 public:
 	// Constructor
 	IntBinaryTree() {
@@ -56,6 +57,6 @@ public:
 
 	void LoadArray(int *A, int sz);
 
-	//void ReturnSortedArray(int *A, int sz);
+	void ReturnSortedArray(int *A, int sz);
 };
 #endif

@@ -126,6 +126,7 @@ void IntBinaryTree::PrintTree(TreeNode *t, int Indent, int Level) {
 //****************************************************************
 
 void IntBinaryTree::PrintTree(int Indent, int Level) {
+	cout<<root->value<<endl;
 	if (root != NULL)
 		PrintTree(root, Indent, Level);
 }
@@ -151,24 +152,25 @@ int IntBinaryTree::maxValue(int *A, int sz)
 /* Build the tree recursively
  *
  */
-void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<TreeNode*> varList, int height, int maxVar, int h)
+void IntBinaryTree::buildTree(TreeNode *&nodePtr, queue<int> &varList, int height, int maxVar, int h)
 {
+	height++;
 	if(height == h){ // if depth is reached then setup nodes accordingly
 		if(!varList.empty()){ // if the queue is not empty place value
-			TreeNode *newNode = varList.front();
+			nodePtr = new TreeNode();
+			nodePtr->value = varList.front();
 			varList.pop();
 		}
 		else { // when queue is empty set to the max var
-			TreeNode *newNode = new TreeNode();
-			newNode->value = maxVar;
+			nodePtr = new TreeNode();
+			nodePtr->value = maxVar;
 		}
 	}
 	else if(height != h){ // if still in null nodes recurse
 		nodePtr = new TreeNode();
 		nodePtr->value = -1;
-		height++;
-		buildTree(nodePtr->left, varList, height++, maxVar, h); // left recursive step
-		buildTree(nodePtr->right, varList, height++, maxVar, h); // right recursive step
+		buildTree(nodePtr->left, varList, height, maxVar, h); // left recursive step
+		buildTree(nodePtr->right, varList, height, maxVar, h); // right recursive step
 	}
 }
 
@@ -178,23 +180,43 @@ void IntBinaryTree::buildTree(TreeNode *nodePtr, queue<TreeNode*> varList, int h
  */
 void IntBinaryTree::LoadArray(int *A, int sz)
 {	
-	queue<TreeNode*> varList;
+	queue<int> varList;
 	for(int i = 0; i<sz; i++){
-		TreeNode *node = new TreeNode();
-		node->value = *(A+1);
-		varList.push(node);
+		cout<<A[i]<<endl;
+		varList.push(A[i]);
 	}
 	buildTree(root, varList, 0, maxValue(A, sz), ceil(log2(sz))+1);
 }
 
-//void IntBinaryTree::
-
-/*void ReturnSortedArray(int *A, int sz)
+IntBinaryTree::TreeNode* IntBinaryTree::minTree(TreeNode *&nodePtr, int maxVar)
 {
-	TreeNode *nodePtr = root;
-	TreeNode *tmp = nodePtr->left;
+	if(nodePtr->left && nodePtr->right){
+		TreeNode* lvar = minTree(nodePtr->left, maxVar);
+		TreeNode* rvar = minTree(nodePtr->right, maxVar);
+		if(lvar->value<rvar->value){
+			nodePtr->value = lvar->value;
+			if(!lvar->left && !rvar->right && root->value != -1)
+				lvar->value = maxVar;
+		}
+		else{
+			nodePtr->value = rvar->value;
+			if(!lvar->left && !rvar->right && root->value != -1)
+				rvar->value = maxVar;
+		}
+	}
+	return nodePtr;
+}
+			
 
-	while(nodePtr->value == -1){
-*/
+void IntBinaryTree::ReturnSortedArray(int *A, int sz)
+{
+
+	int max = maxValue(A, sz);
+	int count = 0;
+
+	while (root->value != max){
+		A[count++] = minTree(root, max)->value;
+	}
+}
 //EOF
 //

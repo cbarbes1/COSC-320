@@ -5,17 +5,29 @@ using namespace std;
 
 int main()
 {
-	int *A = new int[8];
+	srand(time(0));
+	int size = 0;
 
-	for(int i = 0; i<8; i++)
-		A[i] = (i+1);
+	cout<<"Input Array Size: ";
+	cin>>size;
 
+	int *A = new int[size];
+
+	for(int i = 0; i<size; i++)
+		A[i] = (rand()%100)+1;
+	
 	IntBinaryTree HelloWorld;
-
-	HelloWorld.LoadArray(A, 8);
+	HelloWorld.LoadArray(A, size);
 
 	HelloWorld.PrintTree();
 
+	HelloWorld.ReturnSortedArray(A, size);
+	
+	HelloWorld.PrintTree();
+
+	for(int i = 0; i<size; i++)
+		cout<<A[i]<<endl;
+	
 	return 0;
 
 }
