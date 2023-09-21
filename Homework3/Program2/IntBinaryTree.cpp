@@ -1,3 +1,8 @@
+/* 
+ * Edited by: Cole Barbes on 09/20/2023
+ * This code is example code that was edited to perform a sort using a tree
+ */
+
 // Implementation file for the IntBinaryTree class
 #include <iostream>
 #include "IntBinaryTree.h"
@@ -132,7 +137,9 @@ void IntBinaryTree::PrintTree(int Indent, int Level) {
 }
 
 /*
- * This funcion finds the max value in an array and returns the max+1 
+ * This funcion finds the max value in an array and returns the max+1
+ * return: the max+1 in an array
+ * Parameters: A dynamically allocated array and its size
  */
 int IntBinaryTree::maxValue(int *A, int sz)
 {
@@ -150,7 +157,7 @@ int IntBinaryTree::maxValue(int *A, int sz)
 
 
 /* Build the tree recursively
- *
+ * Parameters: A tree node pointer, a stl queue, the height at which the function is, the max of the array, and the desired height 
  */
 void IntBinaryTree::buildTree(TreeNode *&nodePtr, queue<int> &varList, int height, int maxVar, int h)
 {
@@ -181,42 +188,89 @@ void IntBinaryTree::buildTree(TreeNode *&nodePtr, queue<int> &varList, int heigh
 void IntBinaryTree::LoadArray(int *A, int sz)
 {	
 	queue<int> varList;
-	for(int i = 0; i<sz; i++){
-		cout<<A[i]<<endl;
+	for(int i = 0; i<sz; i++){ // loop to push element into the queue
 		varList.push(A[i]);
 	}
+	// start the recursion
 	buildTree(root, varList, 0, maxValue(A, sz), ceil(log2(sz))+1);
 }
 
-IntBinaryTree::TreeNode* IntBinaryTree::minTree(TreeNode *&nodePtr, int maxVar)
+
+/* 
+ * Recurse through a given tree, setting the minimum of the 2 branched leaves through the whole tree
+ * Parameters: the tree node, the max value
+ * Return: The value of the sub trees minimum
+ */
+int IntBinaryTree::minTree(TreeNode *&nodePtr, int maxVar)
 {
-	if(nodePtr->left && nodePtr->right){
-		TreeNode* lvar = minTree(nodePtr->left, maxVar);
-		TreeNode* rvar = minTree(nodePtr->right, maxVar);
-		if(lvar->value<rvar->value){
-			nodePtr->value = lvar->value;
-			if(!lvar->left && !rvar->right && root->value != -1)
-				lvar->value = maxVar;
+	if(nodePtr->left && nodePtr->right){ // if there are leaves to this node 
+		// recurse left and right saving the value of the previous recursive step
+		int lvar = minTree(nodePtr->left, maxVar);
+		int rvar = minTree(nodePtr->right, maxVar);
+		
+		if(lvar<rvar){ // if left is less than the right set the nodes value to the left
+			nodePtr->value = lvar;
 		}
-		else{
-			nodePtr->value = rvar->value;
-			if(!lvar->left && !rvar->right && root->value != -1)
-				rvar->value = maxVar;
+		else{ // if equal or greater, set the nodes value to the right
+			nodePtr->value = rvar;
 		}
 	}
-	return nodePtr;
+	return nodePtr->value; // return the value in the node
+}
+
+/* Clear the minimum values from the list
+ * Parameters: A tree node pointer, the minimum, and the max
+ * return: a boolean value for recursive steps 
+ */
+bool IntBinaryTree::clearMin(TreeNode *&nodePtr, int emin, int maxVar)
+{
+	if(!nodePtr->left && !nodePtr->right){ // if the node is a leaf 
+		if(nodePtr->value == emin){ // if leaf is the emin 
+			//set the value to the maxvar and return true
+			nodePtr->value = maxVar;
+			return true;
+		}
+		return false; // if not emin then false
+	}
+	else{// if not then recurse and check if there was a minimum in the leaf
+		bool left = false;
+		bool right = false;
+
+		if(nodePtr->left->value == emin)
+			left = clearMin(nodePtr->left, emin, maxVar);
+		else
+			right = clearMin(nodePtr->right, emin, maxVar);
+
+		if(left || right)
+			nodePtr->value = maxVar;
+
+		return (left || right); // return whether there was a leaf in this step
+	}
 }
 			
-
+/*
+ * grab the sorted array out of the tree 
+ * Parameters: The array to save the values in and the size
+ */
 void IntBinaryTree::ReturnSortedArray(int *A, int sz)
 {
 
 	int max = maxValue(A, sz);
 	int count = 0;
-
-	while (root->value != max){
-		A[count++] = minTree(root, max)->value;
+	int emin = 0;
+	
+	// while not the max and the count doesnt equal the size
+	while(emin != max && sz != count){
+		emin = minTree(root, max);
+		A[count++] = emin; 
+		clearMin(root, emin, max);
+		emin = minTree(root, max);
 	}
 }
+
 //EOF
 //
+////
+////
+////
+////

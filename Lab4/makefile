@@ -1,18 +1,15 @@
-#Created by Don Spickler  1/28/2022
+#Created by Cole Barbes and Harrison Colborne
 
 PROG = prog
 CC = g++
 CPPFLAGS = -g -Wall -std=c++11
-OBJS = main.o IntBinaryTree.o
+OBJS = main.o 
 
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-main.o : main.cpp
+main.o : main.cpp BinaryTree.h
 	$(CC) $(CPPFLAGS) -c main.cpp
-
-IntBinaryTree.o : IntBinaryTree.cpp IntBinaryTree.h
-	$(CC) $(CPPFLAGS) -c IntBinaryTree.cpp
 
 clean:
 	rm -f core $(PROG) $(OBJS)

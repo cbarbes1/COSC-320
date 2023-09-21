@@ -27,7 +27,8 @@ private:
 	void IndentBlock(int);
 	void PrintTree(TreeNode*, int, int);
 	void buildTree(TreeNode*&, queue<int> &p, int, int, int);
-	TreeNode* minTree(TreeNode*&, int);
+	int minTree(TreeNode*&, int);
+	bool clearMin(TreeNode*&, int, int);
 public:
 	// Constructor
 	IntBinaryTree() {
