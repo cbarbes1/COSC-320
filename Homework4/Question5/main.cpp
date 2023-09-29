@@ -5,9 +5,13 @@ using namespace std;
 
 int main(){
 
-    crossref theBookCrossReference("new.txt");
+    string fileName = "";
+    cout<<"Please enter the name of the file to cross reference from: ";
+    cin>>fileName;
 
-    theBookCrossReference.printDataBase();
+    crossref CrossRef(fileName);
+
+    CrossRef.printDataBase();
 
     return 0;
 

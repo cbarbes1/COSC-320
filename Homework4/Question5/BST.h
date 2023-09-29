@@ -3,8 +3,8 @@
 
 #include "BinaryTree.h"
 
-template<class T, class Node = crossrefNode<int>>
-class BST: public BinaryTree<T> {
+template<class T, class Node = TreeNode<T>>
+class BST: public BinaryTree<T, Node> {
 protected:
 	void insert(Node*&, Node*&);
 	void deleteNode(T, Node*&);
@@ -18,7 +18,7 @@ public:
 	void remove(T);
 
 	virtual bool find(const T&);
-	virtual Node*& findNode(const T&);
+	virtual Node* findNode(const T&);
 };
 
 template<class T, class Node>
@@ -43,7 +43,7 @@ template<class T, class Node>
 void BST<T, Node>::insert(T item) {
 	Node *newNode = new Node;
 	newNode->value = item;
-	insert(BinaryTree<T>::root, newNode);
+	insert(BinaryTree<T, Node>::root, newNode);
 }
 
 template<class T, class Node>
@@ -52,8 +52,8 @@ bool BST<T, Node>::find(const T &item) {
 }
 
 template<class T, class Node>
-Node*& BST<T, Node>::findNode(const T &item) {
-	Node *nodePtr = BinaryTree<T>::root;
+Node* BST<T, Node>::findNode(const T &item) {
+	Node *nodePtr = BinaryTree<T, Node>::root;
 
 	while (nodePtr) {
 		if (nodePtr->value == item)
@@ -67,7 +67,7 @@ Node*& BST<T, Node>::findNode(const T &item) {
 }
 
 template<class T, class Node> void BST<T, Node>::remove(T item) {
-	deleteNode(item, BinaryTree<T>::root);
+	deleteNode(item, BinaryTree<T, Node>::root);
 }
 
 template<class T, class Node> void BST<T, Node>::deleteNode(T item, Node *&nodePtr) {
