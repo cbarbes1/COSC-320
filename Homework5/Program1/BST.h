@@ -17,11 +17,11 @@ protected:
 	int numLeaves(TreeNode<T>*) const;
 	int height(TreeNode<T>*) const;
 
-	void leftRotate(TreeNode<T>*, TreeNode<T>*);
-	void rightRotate(TreeNode<T>*, TreeNode<T>*);
+	void leftRotate(TreeNode<T>*&);
+	void rightRotate(TreeNode<T>*&);
 
 	void findAndDeleteByRotate(T item, TreeNode<T> *&nodePtr);
-	void rotateDelete(TreeNode<T>*, TreeNode<T>*&);
+	void rotateDelete(TreeNode<T>*&);
 
 public:
 	BST();
@@ -238,34 +238,25 @@ int BST<T>::height(TreeNode<T>* nodePtr) const{
  * Rotate right function to rotate the given node
  */
 template<class T>
-void BST<T>::leftRotate(TreeNode<T>* grNode, TreeNode<T>* nodePtr)
+void BST<T>::leftRotate( TreeNode<T>*& nodePtr)
 {
-	TreeNode<T> *p = nodePtr->right; // set the pointer to the node to be rotated up
-	if(grNode->left == nodePtr){
-		grNode->left = p;
-	}
-	else{
-		grNode->right = p;
-	}
-	nodePtr->right = p->left; // set the right to the left of the right node
-	p->left = nodePtr; // set the left of the new parent to the new right child
+	TreeNode<T> *p = nodePtr->right;
+	TreeNode<T> *temp = p->left;
+	p->left = nodePtr;
+	nodePtr->right = temp;
+	nodePtr = p;
 }
 
 /*
  * Rotate left function to rotate the given node
  */
 template<class T>
-void BST<T>::rightRotate(TreeNode<T>* grNode, TreeNode<T>* nodePtr)
+void BST<T>::rightRotate(TreeNode<T>*& nodePtr)
 {
-	TreeNode<T> *p = nodePtr->left; // set the pointer to the node to be rotated up
-	if(grNode->left == nodePtr){
-		grNode->left = p;
-	}
-	else{
-		grNode->right = p;
-	}
-	nodePtr->left = p->right; // set the left to the right of the new parent
-	p->right = nodePtr; // set the right of the new parent to the node
+	TreeNode<T> *p = nodePtr->left;
+	TreeNode<T> *temp = p->right;
+	p->right = nodePtr;
+	nodePtr->left = temp;
 }
 
 /*
@@ -281,57 +272,47 @@ template<class T> void BST<T>::findAndDeleteByRotate(T item, TreeNode<T> *&nodeP
 	else if (item > nodePtr->value)
 		findAndDeleteByRotate(item, nodePtr->right);
 	else
-		rotateDelete(nullptr, nodePtr);
+		rotateDelete(nodePtr);
 }
 
 template<class T>
 void BST<T>::rDelete(T var)
 {
-	findAndDeleteByRotate(var, this->root);
+	if(find(var))
+		findAndDeleteByRotate(var, this->root);
+	else
+		cout<<"Node not in the tree"<<endl;
 }
 
 
 template<class T>
-void BST<T>::rotateDelete(TreeNode<T>* grNode, TreeNode<T>*& nodePtr)
+void BST<T>::rotateDelete(TreeNode<T>*& nodePtr)
 {
-	if(nodePtr->right && nodePtr->left){
-		int leftHeight = height(nodePtr->left);
-		int rightHeight = height(nodePtr->right);
-		if(leftHeight > rightHeight){
-			rightRotate(grNode, nodePtr);
-		}
-		else if(rightHeight <= leftHeight){
-			leftRotate(grNode, nodePtr);
-		}
-		rotateDelete(grNode, nodePtr);
+	TreeNode<T> *p = nodePtr;
+	if(!nodePtr->left){
+		nodePtr = nodePtr->right;
 	}
-	else {
-		if(grNode->left == nodePtr){
-			if(nodePtr->left && !nodePtr->right){
-				grNode->left = nodePtr->left;
-			}
-			else if(nodePtr->right && !nodePtr->left){
-				grNode->left = nodePtr->right;
-			}
-			else{
-				grNode->left = nullptr;
-			}
-		}
-		else{
-			if(nodePtr->left && !nodePtr->right){
-				grNode->right = nodePtr->left;
-			}
-			else if(nodePtr->right && !nodePtr->left){
-				grNode->right = nodePtr->right;
-			}
-			else{
-				grNode->right = nullptr;
-			}
-		}
-		delete nodePtr;
-		nodePtr = nullptr;
+	else if(!nodePtr->right){
+		nodePtr = nodePtr->left;
 	}
+	else{
+		int leftHeight = 0, rightHeight = 0;
 
+		leftHeight = height(p->left);
+		rightHeight = height(p->right);
+
+		if(leftHeight > rightHeight){
+			rightRotate(p);
+
+		}
+		else if(rightHeight >= leftHeight){
+			leftRotate(p);
+		}
+		this->PrintTree();
+
+		rotateDelete(p);
+	}
+	delete p;
 }
 
 #endif /* BST_H_ */
