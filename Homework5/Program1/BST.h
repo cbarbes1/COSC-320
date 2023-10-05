@@ -238,12 +238,13 @@ int BST<T>::height(TreeNode<T>* nodePtr) const{
  * Rotate right function to rotate the given node
  */
 template<class T>
-void BST<T>::leftRotate( TreeNode<T>*& nodePtr)
+void BST<T>::leftRotate(TreeNode<T>*& nodePtr)
 {
 	TreeNode<T> *p = nodePtr->right;
 	TreeNode<T> *temp = p->left;
 	p->left = nodePtr;
 	nodePtr->right = temp;
+	nodePtr = p;
 }
 
 /*
@@ -256,6 +257,7 @@ void BST<T>::rightRotate(TreeNode<T>*& nodePtr)
 	TreeNode<T> *temp = p->right;
 	p->right = nodePtr;
 	nodePtr->left = temp;
+	nodePtr = p;
 }
 
 /*
@@ -290,28 +292,28 @@ void BST<T>::rotateDelete(TreeNode<T>*& nodePtr)
 	TreeNode<T> *p = nodePtr;
 	if(!nodePtr->left){
 		nodePtr = nodePtr->right;
+		delete p;
 	}
 	else if(!nodePtr->right){
 		nodePtr = nodePtr->left;
+		delete p;
 	}
 	else{
 		int leftHeight = 0, rightHeight = 0;
-
-		leftHeight = height(p->left);
-		rightHeight = height(p->right);
+		
+		leftHeight = height(nodePtr->left);
+		rightHeight = height(nodePtr->right);
 
 		if(leftHeight > rightHeight){
-			rightRotate(p);
-
+			rightRotate(nodePtr);
+			rotateDelete(nodePtr->right);
 		}
 		else if(rightHeight >= leftHeight){
-			leftRotate(p);
+			leftRotate(nodePtr);
+			rotateDelete(nodePtr->left);
+			
 		}
-		this->PrintTree();
-
-		rotateDelete(p);
 	}
-	delete p;
 }
 
 #endif /* BST_H_ */
