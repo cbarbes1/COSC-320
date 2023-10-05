@@ -244,7 +244,6 @@ void BST<T>::leftRotate( TreeNode<T>*& nodePtr)
 	TreeNode<T> *temp = p->left;
 	p->left = nodePtr;
 	nodePtr->right = temp;
-	nodePtr = p;
 }
 
 /*
