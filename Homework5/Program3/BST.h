@@ -31,21 +31,31 @@ protected:
 	void rightRotate(TreeNode<T>*&);
     
     // added 2 private functions to perform the rotate delete
-
-	void findAndDeleteByRotate(T item, TreeNode<T> *&nodePtr);
-	void rotateDelete(TreeNode<T>*&);
+    void rotateDeleteByHeight(TreeNode<T>*&);
+    void rotateDeleteByNumNodes(TreeNode<T>*&);
+	void findAndrDeleteByHeight(T item, TreeNode<T> *&nodePtr);
+    void findAndrDeleteByNumNodes(T item, TreeNode<T> *&nodePtr);
+    
+    
+	
 
 public:
 	BST();
 	virtual ~BST();
 
 	void insert(T);
+    
+    // delete by merge
 	void remove(T);
 
+    // delete by copy
 	void deleteValue(T);
 
     // rotate delete set up function
-	void rDelete(T val);
+	void rDeleteByHeight(T val);
+    
+    // rotate delete set up function
+	void rDeleteByNumNodes(T val);
 
     // set up functions
 	int numNodes() const {
@@ -279,16 +289,32 @@ void BST<T>::rightRotate(TreeNode<T>*& nodePtr)
  * Recursive find for deleting a node.  Once the value is found the
  * deleteByrotate function s called on the node.
  */
-template<class T> void BST<T>::findAndDeleteByRotate(T item, TreeNode<T> *&nodePtr) {
+template<class T> void BST<T>::findAndrDeleteByHeight(T item, TreeNode<T> *&nodePtr) {
 	if (!nodePtr)
 		return;
 
 	if (item < nodePtr->value)
-		findAndDeleteByRotate(item, nodePtr->left);
+		findAndrDeleteByHeight(item, nodePtr->left);
 	else if (item > nodePtr->value)
-		findAndDeleteByRotate(item, nodePtr->right);
+		findAndrDeleteByHeight(item, nodePtr->right);
 	else
-		rotateDelete(nodePtr);
+		rotateDeleteByHeight(nodePtr);
+}
+
+/*
+ * Recursive find for deleting a node.  Once the value is found the
+ * deleteByrotate function s called on the node.
+ */
+template<class T> void BST<T>::findAndrDeleteByNumNodes(T item, TreeNode<T> *&nodePtr) {
+	if (!nodePtr)
+		return;
+
+	if (item < nodePtr->value)
+		findAndrDeleteByNumNodes(item, nodePtr->left);
+	else if (item > nodePtr->value)
+		findAndrDeleteByNumNodes(item, nodePtr->right);
+	else
+		rotateDeleteByNumNodes(nodePtr);
 }
 
 /*
@@ -296,20 +322,34 @@ template<class T> void BST<T>::findAndDeleteByRotate(T item, TreeNode<T> *&nodeP
  * variable of type T to find and delete
  */
 template<class T>
-void BST<T>::rDelete(T var)
+void BST<T>::rDeleteByHeight(T var)
 {
 	if(find(var))
-		findAndDeleteByRotate(var, this->root);
+		findAndrDeleteByHeight(var, this->root);
+	else
+		cout<<"Node not in the tree"<<endl;
+}
+
+
+/*
+ * set up the rotate delete function
+ * variable of type T to find and delete
+ */
+template<class T>
+void BST<T>::rDeleteByNumNodes(T var)
+{
+	if(find(var))
+		findAndrDeleteByNumNodes(var, this->root);
 	else
 		cout<<"Node not in the tree"<<endl;
 }
 
 /*
- * Rotate a given root until there is atleast less than 1 child
+ * Rotate a given root with deeper height until there is atleast less than 1 child
  * parameters: the node to be deleted
  */
 template<class T>
-void BST<T>::rotateDelete(TreeNode<T>*& nodePtr)
+void BST<T>::rotateDeleteByHeight(TreeNode<T>*& nodePtr)
 {
 	TreeNode<T> *p = nodePtr;
 	if(!nodePtr->left){ // if no left delete the right node
@@ -329,14 +369,52 @@ void BST<T>::rotateDelete(TreeNode<T>*& nodePtr)
 
 		if(leftHeight > rightHeight){ // if the left is deeper rotate the left root about x
 			rightRotate(nodePtr);
-			rotateDelete(nodePtr->right);
+			rotateDeleteByHeight(nodePtr->right);
 		}
 		else if(rightHeight >= leftHeight){ // if the right is deeper rotate the right root about x
 			leftRotate(nodePtr);
-			rotateDelete(nodePtr->left);
+			rotateDeleteByHeight(nodePtr->left);
 			
 		}
 	}
 }
+
+/*
+ * Rotate a given root with more nodes in the subtree until there is atleast less than 1 child
+ * parameters: the node to be deleted
+ */
+template<class T>
+void BST<T>::rotateDeleteByNumNodes(TreeNode<T> *&nodePtr)
+{
+	TreeNode<T> *p = nodePtr;
+	if(!nodePtr->left){ // if no left delete the right node
+		nodePtr = nodePtr->right;
+		delete p;
+	}
+	else if(!nodePtr->right){ // if no right delete the left node
+		nodePtr = nodePtr->left;
+		delete p;
+	}
+	else{ // if both nodes
+		int leftNumNodes = 0, rightNumNodes = 0;
+		
+        // grab the number of nodes
+		leftNumNodes = numNodes(nodePtr->left);
+		rightNumNodes = numNodes(nodePtr->right);
+
+		if(leftNumNodes > rightNumNodes){ // if the left has more nodes rotate the left root about x
+			rightRotate(nodePtr);
+			rotateDeleteByNumNodes(nodePtr->right);
+		}
+		else if(rightNumNodes >= leftNumNodes){ // if the right has more nodes rotate the right root about x
+			leftRotate(nodePtr);
+			rotateDeleteByNumNodes(nodePtr->left);
+			
+		}
+	}
+}
+
+
+
 
 #endif /* BST_H_ */

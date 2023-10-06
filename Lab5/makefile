@@ -1,4 +1,3 @@
-# created by cole barbes on 10/05/23
 PROG = prog
 CC = g++
 CPPFLAGS = -g -Wall -std=c++11
@@ -7,7 +6,7 @@ OBJS = main.o
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-main.o : main.cpp
+main.o : main.cpp BinaryTree.h AVLTree.h
 	$(CC) $(CPPFLAGS) -c main.cpp
 
 clean:
