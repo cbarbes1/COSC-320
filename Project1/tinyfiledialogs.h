@@ -55,7 +55,7 @@ misrepresented as being the original software.
 #ifdef	__cplusplus
 /* if tinydialogs.c is compiled as C++ code rather than C code, you may need to comment this out
 				and the corresponding closing bracket near the end of this file. */
-extern "C" {
+//extern "C" {
 #endif
 
 /******************************************************************************************************/
@@ -244,7 +244,7 @@ wchar_t * tinyfd_colorChooserW(
 #endif /*_WIN32 */
 
 #ifdef	__cplusplus
-} /*extern "C"*/
+//} /*extern "C"*/
 #endif
 
 #endif /* TINYFILEDIALOGS_H */

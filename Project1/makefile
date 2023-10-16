@@ -1,17 +1,20 @@
+# created by Cole Barbes on 10/15
 PROG = prog
 CC = g++
 CPPFLAGS = -g -Wall -std=c++11
-OBJS = ExpressionTree.o Function.o
+OBJS = main.o Function.o tinyfiledialogs.o
 
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-ExpressionTree.o : ExpressionTree.cpp
-	$(CC) $(CPPFLAGS) -c ExpressionTree.cpp
+main.o : main.cpp
+	$(CC) $(CPPFLAGS) -c main.cpp
 
 Function.o : Function.cpp
 	$(CC) $(CPPFLAGS) -c Function.cpp
 
+tinyfiledialogs.o : tinyfiledialogs.cpp
+	$(CC) $(CPPFLAGS) -c tinyfiledialogs.cpp
 clean:
 	rm -f core $(PROG) $(OBJS)
 

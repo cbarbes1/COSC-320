@@ -5,29 +5,22 @@
 #include <sstream>
 #include <cmath>
 #include <string>
+#include "InfInt.h"
+#include <stdexcept>
+
 
 using namespace std;
+const string operators = "+-*/%";
+const string FunctionList[] = {"fact", "fib","sqrt" };
 
-const string FunctionStr = "ABCDFGHIJKLMNST";
-const string TerminalsStr = "EPXYZUV#";
-const string VariablesStr = "XYZUV";
-const string ConstStr = "EP";
-const string FunctionListStr = "ABCDFGHIJKLMNSTEP";
-const string FunctionList[] = { "COT", "SEC", "COS", "CSC", "EXP", "LOG",
-		"SINH", "COSH", "TANH", "ASIN", "LN", "ACOS", "ATAN", "SIN", "TAN",
-		"E", "PI" };
-
-const double PI = 3.141592658979324;
-const double E = 2.718281828459045;
-const double tol = 0.000000001;
 
 class ExpData {
 public:
-	char op;
-	double num;
+	string op;
+	InfInt num;
 
 	ExpData() {
-		op = ' ';
+		op = "";
 		num = 0;
 	}
 
@@ -63,14 +56,14 @@ private:
 	ExpTreeNode* Factor(ExpData &Token);
 	ExpTreeNode* Power(ExpData &Token);
 
-	double Eval(ExpTreeNode *fct, double xval, double yval, double zval,
-			double uval, double vval, int &error);
-
-	ExpTreeNode* diff(char var);
+	InfInt Eval(ExpTreeNode *fct);
 
 	bool IsLeaf(ExpTreeNode *t);
-	bool IsNumber(ExpTreeNode *t);
 	void IndentBlock(int num = 4);
+	InfInt factorial(int);
+
+
+	InfInt fibonacci(int);
 
 	string InputString;
 	int pos;
@@ -84,16 +77,7 @@ public:
 	void ConvertExpression(string str);
 	void LoadFunction(string str);
 
-	double Evaluate(double xval, int &error);
-	double EvaluateX(double xval, int &error);
-	double EvaluateXY(double xval, double yval, int &error);
-	double EvaluateXYZ(double xval, double yval, double zval, int &error);
-	double EvaluateUV(double uval, double vval, int &error);
-	Function differentiate(char var = 'X');
-
-	static string FunctionCrossRef(char chartest);
-	static string FunctionCrossRef(string strtest, bool StdFncToCode = true);
-	static string Ucase(string str);
+	InfInt Eval();
 
 	friend istream& operator>>(istream &istr, Function &fx);
 	friend ostream& operator<<(ostream &ostr, Function &fx);
@@ -109,5 +93,6 @@ public:
 	void PrintFunctionPostfix(ExpTreeNode *t);
 	void ClearFunction();
 };
+
 
 #endif /* FUNCTION_H_ */

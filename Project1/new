@@ -1,0 +1,6 @@
+i1 < ((8)*(8))
+o1 < 64
+i2 < ((9)*(9))
+o2 < 81
+i3 < ((8)^(~(3)))
+o3 < Error: Exponent must be non-negative.

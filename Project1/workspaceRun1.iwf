@@ -1,0 +1,20 @@
+i1 < ((8)*(8))
+o1 < 64
+i2 < ((8)*(8))
+o2 < 64
+i3 < ((7)*(7))
+o3 < 49
+i4 < ((9)*(9))
+o4 < 81
+i5 < ((2)^(~(3)))
+o5 < Error: Exponent must be non-negative.
+i6 < (sin(345))
+o6 < Error: Function not found.
+i7 < (fib(~(2)))
+o7 < Error: Fibonacci value must be non-negative.
+i8 < (fact(~(100)))
+o8 < Error: Factorial value must be non-negative.
+i9 < (sqrt(~(5)))
+o9 < Error: Square root value must be non-negative.
+i10 < ((2)^(3432423423423423423423423423423423423423))
+o10 < Error: out of bounds

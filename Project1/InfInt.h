@@ -34,6 +34,7 @@
 
 #ifndef INFINT_H_
 #define INFINT_H_
+#define INFINT_USE_EXCEPTIONS
 
 // Turn on the use of exception handling.
 // #define INFINT_USE_EXCEPTIONS
