@@ -21,6 +21,8 @@ ostream& operator<<(ostream &ostr, ExpData &item) {
 
 	if (item.op == "#")
 		ostr << item.num;
+    else if(item.op == "~")
+        ostr << "-";
 	else
 		ostr << item.op;
 	return ostr;

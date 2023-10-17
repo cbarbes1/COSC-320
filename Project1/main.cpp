@@ -37,15 +37,18 @@ int main() {
 				cout<<"Opening "<<filename<<endl;
 				ifstream InFile(filename);
 				if(InFile.is_open()){
+                    vector<Function> tmpList;
 					while(InFile){
 						getline(InFile, line, '\n');
 						if(line[0] == 'i'){
-							line = line.substr(4);
+							line = line.substr(line.find('>')+1);
 							cout<<"i"<<IOTracker<<" > "<<line<<endl;
+                            line = IOreplace(line, tmpList);
 							cout<<"o"<<IOTracker<<" > ";
 							try{
 								f.ConvertExpression(line);
-								ExpTreeList.push_back(f);
+								tmpList.push_back(f);
+                                ExpTreeList.push_back(f);
 								cout<<f.Eval()<<endl;
 							}catch(const exception& e){
 								cout<<"Error: "<<e.what()<<endl;
@@ -55,6 +58,7 @@ int main() {
 						}
 
 					}
+					tmpList.clear();
 				}
 				InFile.close();
 			}else {
@@ -188,16 +192,25 @@ string IOreplace(string x, vector<Function> list)
 		}
 	}
 
+	pos = 0;
+	IONum = 0;
+    
 	while(x.find('o', pos)!=string::npos)
 	{
 		pos = x.find('o', pos);
-		pos++;
-		int startpos = pos;
-		while(isdigit(x[pos]))
+		if(isdigit(x[(pos+1)])){
 			pos++;
-		tmp = x.substr(startpos, pos-1);
-		IONum = stoi(tmp);
-		x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString());
+			int startpos = pos;
+			while(isdigit(x[pos]))
+				pos++;
+			tmp = x.substr(startpos, pos-1);
+			IONum = stoi(tmp);
+			x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString());
+		}
+		else {
+			pos+=3;
+			continue;
+		}
 	}
 
 
