@@ -132,9 +132,9 @@ ExpData Function::GetToken() {
 	int startpos;
 	InfInt numval;
 
-	testchr = InputString[pos];
+	testchr = InputString[pos]; // grab test character
 
-	if (isdigit(testchr)) {
+	if (isdigit(testchr)) { // if the character is a numeric character
 		startpos = pos;
 		while (isdigit(InputString[pos]))
 			pos++;
@@ -144,15 +144,15 @@ ExpData Function::GetToken() {
 			ReturnVal.num = numval;
 		else
 			ReturnVal.num = 0;
-	} else {
-		if(isalpha(testchr)){
+	} else { 
+		if(isalpha(testchr)){ // if the character is alphabetic grab the subsequent string
 			startpos = pos;
 			while (isalpha(InputString[pos]))
 				pos++;
 			TempStr = InputString.substr(startpos, pos - startpos);
 			ReturnVal.op = TempStr;
 		}
-		else {
+		else { // if other char like operator then parse into the tree
 			pos++;
 			ReturnVal.op += testchr;
 			ReturnVal.num = 0;

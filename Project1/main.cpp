@@ -1,3 +1,9 @@
+/*
+ * Author: Cole Barbes
+ * Creation Date: 10/18/23
+ * Last Edited: 10/18/23
+ * Description: Implement a arbitrary integer calculator
+ */
 #include <iostream>
 #include <cstdlib>
 #include <fstream>
@@ -8,43 +14,51 @@
 
 using namespace std;
 
+// prototype functions
 void HelpMenu();
 void Header();
 string IOreplace(string, vector<Function>);
 
 int main() {
 
-	string exp;
-	string line;
+    // create needed vars
+	string exp = "";
+	string line = "";
 	Function f;
 	vector<Function> ExpTreeList;
 
 
+    // for loop to run the simulator
 	for(int IOTracker = 1; exp!="exit"; IOTracker++){
+        
+        // output the input terminal and take in the line
 		cout<<"i"<<IOTracker<<" > ";
 		getline(cin, exp);
 
+        // if the selection is a help command print the help screen and decrement the Tracker
 		if(exp=="H"||exp=="h"||exp=="-h"){
 			HelpMenu();
 			IOTracker--;
 		}
-		else if(exp=="open"){
+		else if(exp=="open"){ //  if "open" open the file and read it in
+            
+            // grab the needed info for the file opening using the tiny file dialog gui thing
 			char const *lFilterPatterns[2] = { "*.iwf", "*"};
-
 			char const *filename = tinyfd_openFileDialog("Open Arbitrary Precision Integer Calculator Workspace File", NULL, 1, lFilterPatterns, "Workspace File", 0);
 
-			if (filename) {
+			if (filename) { // if the file name was recieved
 				cout<<"Opening "<<filename<<endl;
-				ifstream InFile(filename);
-				if(InFile.is_open()){
-                    vector<Function> tmpList;
-					while(InFile){
-						getline(InFile, line, '\n');
+				ifstream InFile(filename);// open the file for input 
+				if(InFile.is_open()){ // if the file is open
+                    vector<Function> tmpList; // create the temporary list to remove the inputs and outputs incase this is an externally created input file
+					while(InFile){ // while not pointing at the eof
+						getline(InFile, line, '\n'); // get the line from the file
 						if(line[0] == 'i'){
-							line = line.substr(line.find('>')+1);
+							line = line.substr(line.find('>')+1); // substring the io setup part
 							cout<<"i"<<IOTracker<<" > "<<line<<endl;
-                            line = IOreplace(line, tmpList);
-							cout<<"o"<<IOTracker<<" > ";
+                            line = IOreplace(line, tmpList); // replace the lines io 
+							cout<<"o"<<IOTracker<<" > "; // create the output starter
+                            // try to convert and catch the exceptions
 							try{
 								f.ConvertExpression(line);
 								tmpList.push_back(f);
@@ -66,7 +80,7 @@ int main() {
 			}
 			IOTracker--;
 		}
-		else if(exp=="save"){
+		else if(exp=="save"){ // if "save" then save the input and output to a file
 
 			char const *lFilterPatterns[2] = { "*.iwf" , "*"};
 
@@ -92,7 +106,7 @@ int main() {
 			}
 			IOTracker--;
 		}
-		else if(exp=="exit"){
+		else if(exp=="exit"){ // print exit screen 
 			cout<<"Have a nice day!"<<endl;
 			cout<<"Below are the run stats: "<<endl;
 			cout<<"Number of computations: "<<(IOTracker-1)<<endl;
@@ -110,7 +124,7 @@ int main() {
 			}
 			cout<<endl;
 		}
-		else {
+		else { // take in the input into the expression tree and evaluate the expression outputting the result as an output line
 			cout<<"o"<<IOTracker<<" > ";
 			exp = IOreplace(exp, ExpTreeList);
 			try{
@@ -168,25 +182,35 @@ void HelpMenu()
 	cout<<"Similarly, i4 * o7 will multiply input 4 by output 7.\n\n";
 }
 
+/*
+ * Simple replace function to pull the input and output out of the line and replacing them with the needed io from the list
+ * Parameters: a string x and a list of the IO
+ * return a string that is the new complete output
+ */
 string IOreplace(string x, vector<Function> list)
 {
+    // create the needed vars 
 	int pos = 0;
 	int IONum = 0;
 	string tmp;
 
+    // while an i is found in the string replace it and the subsequent numbers with an io
 	while(x.find('i', pos)!=string::npos)
 	{
-		pos = x.find('i', pos);
+		pos = x.find('i', pos); // grab the position
+        // if it a digit replace
 		if(isdigit(x[(pos+1)])){
 			pos++;
 			int startpos = pos;
-			while(isdigit(x[pos]))
+            // while its a digit increment the position until it reaches the end
+			while(isdigit(x[pos])) 
 				pos++;
+            // grab the substr and send it to an int
 			tmp = x.substr(startpos, pos-1);
 			IONum = stoi(tmp);
-			x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString());
+			x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString()); //replace the input 
 		}
-		else {
+		else { //  if no number after i then it must be a word so skip up 3 and continue through the string
 			pos+=3;
 			continue;
 		}
@@ -195,19 +219,23 @@ string IOreplace(string x, vector<Function> list)
 	pos = 0;
 	IONum = 0;
     
+    // while an i is found in the string replace it and the subsequent numbers with an io
 	while(x.find('o', pos)!=string::npos)
 	{
-		pos = x.find('o', pos);
+		pos = x.find('o', pos);// grab the position
+		// if it a digit replace
 		if(isdigit(x[(pos+1)])){
 			pos++;
 			int startpos = pos;
-			while(isdigit(x[pos]))
+            // while its a digit increment the position until it reaches the end
+			while(isdigit(x[pos])) 
 				pos++;
+            // grab the substr and send it to an int
 			tmp = x.substr(startpos, pos-1);
 			IONum = stoi(tmp);
-			x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString());
+			x.replace((startpos-1), (pos-startpos+1), (list[(IONum-1)]).toString()); //replace the output 
 		}
-		else {
+		else { //  if no number after i then it must be a word so skip up 3 and continue through the string
 			pos+=3;
 			continue;
 		}
