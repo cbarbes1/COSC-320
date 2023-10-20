@@ -1,3 +1,8 @@
+/*
+ * Author: Don Spickler, Edited By: Cole Barbes
+ * ** This file is used for COSC 320 purposes only **
+ * Last Edited: 10/19/23
+ */
 #ifndef FUNCTION_H_
 #define FUNCTION_H_
 
@@ -60,9 +65,9 @@ private:
 
 	bool IsLeaf(ExpTreeNode *t);
 	void IndentBlock(int num = 4);
+    // simple factorial function
 	InfInt factorial(int);
-
-
+    // simple fibonacci funtion
 	InfInt fibonacci(int);
 
 	string InputString;

@@ -1,7 +1,7 @@
 /*
  * Author: Cole Barbes
  * Creation Date: 10/18/23
- * Last Edited: 10/18/23
+ * Last Edited: 10/19/23
  * Description: Implement a arbitrary integer calculator
  */
 #include <iostream>
@@ -85,22 +85,22 @@ int main() {
 			char const *lFilterPatterns[2] = { "*.iwf" , "*"};
 
 			char const *filename = tinyfd_saveFileDialog("Save Arbitrary Precision Integer Calculator Workspace File", NULL, 1, lFilterPatterns, "Workspace File");
-			if (filename) {
-				cout<<"Saving Workspace to "<<filename<<endl;
-				ofstream outputFile(filename);
-				if(outputFile.is_open()){
+			if (filename) { // if the file name was valid and not canceled
+				cout<<"Saving Workspace to "<<filename<<endl; // print prompt
+				ofstream outputFile(filename); // open file
+				if(outputFile.is_open()){ // check to see if the file opened properly
 					int pos = 1;
-					for(Function t : ExpTreeList){
+					for(Function t : ExpTreeList){ // for each value in the list save the io to the file
 						outputFile<<"i"<<pos<<" > "<<t<<endl;
 						outputFile<<"o"<<pos++<<" > ";
-						try{
+						try{ // try to evaluate the expression
 							outputFile<<t.Eval()<<endl;
 						}catch(const exception& e){
 							outputFile<<"Error: "<<e.what()<<endl;
 						}
 					}
 				}
-				outputFile.close();
+ 				outputFile.close();
 			}else {
 				cerr<<"Failed to open the file for writing\n";
 			}
@@ -112,11 +112,11 @@ int main() {
 			cout<<"Number of computations: "<<(IOTracker-1)<<endl;
 			cout<<"Summary: "<<endl;
 			int temp = 0;
-			for(Function t : ExpTreeList){
+			for(Function t : ExpTreeList){ // for each loop through the list and print the IO
 				temp++;
 				cout<<"i"<<temp<<" > "<<t<<endl;
 				cout<<"o"<<temp<<" > "<<" ";
-				try{
+				try{ // try to evaluate the expression and throw exceptions if needed
 					cout<<t.Eval()<<endl;
 				}catch(const exception& e){
 					cout<<"Error: "<<e.what()<<endl;
@@ -127,7 +127,7 @@ int main() {
 		else { // take in the input into the expression tree and evaluate the expression outputting the result as an output line
 			cout<<"o"<<IOTracker<<" > ";
 			exp = IOreplace(exp, ExpTreeList);
-			try{
+			try{ // attempt to do the actions and throw an exception if there is one
 				f.ConvertExpression(exp);
 				ExpTreeList.push_back(f);
 				cout<<f.Eval()<<endl;

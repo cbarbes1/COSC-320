@@ -1,6 +1,11 @@
+/*
+ * Author: Don Spickler, Edited By: Cole Barbes
+ * ** This file is used for COSC 320 **
+ * last edited: 10/19/23
+ */
 #include "Function.h"
-
-
+#ifdef INFINT_USE_EXCEPTIONS
+#endif
 /*
  * Nifty trick to convert a numeric looking string to a numeric data type.
  * Examples:
@@ -318,61 +323,85 @@ InfInt Function::Eval(ExpTreeNode *fct) {
 		string opstr = (fct->data).op;
 		InfInt ans = 0;
 		InfInt lans, rans;
-		if(opstr == "#"){
+        
+		if(opstr == "#"){ // if number, return
 			ans = (fct->data).num;
 		}
-		else if(opstr == "~"){
+		else if(opstr == "~"){// if negative eval the right and set it as negative
 			ans = -(Eval(fct->right));
 		}
-		else if(opstr == "^"){
+		else if(opstr == "^"){// power
 			rans = Eval(fct->right);
 			if(rans < 0){
 				throw std::runtime_error("Exponent must be non-negative.");
 			}
 			lans = Eval(fct->left);
-			int ransI = rans.toInt();
-			ans = lans;
+            int ransI;
+            try{ // try to convert the number to an int and throw an exception otherwise
+                ransI = rans.toInt();
+            }catch(InfIntException &e){
+                throw std::runtime_error(e.what());
+            }
+			ans = lans; // set the number to be multiplied
+            // run a loop to calculate the answer
 			for(int i = 2; i<=ransI; i++){
 				ans*=lans;
 			}
 		}
-		else if(opstr=="fact"){
-			rans = Eval(fct->right);
-			if(rans < 0){
+		else if(opstr=="fact"){ // take the factorial of an integer
+			rans = Eval(fct->right); // grab the right value
+			if(rans < 0){ // if less than 0 than throw an error
 				throw std::runtime_error("Factorial value must be non-negative.");
 			}
-			ans = factorial(rans.toInt());
+			int ransI;
+            try{ // attempt to convert to an integer
+                ransI = rans.toInt();
+            }catch(InfIntException &e){
+                throw std::runtime_error(e.what());
+            }
+            ans = factorial(ransI); //take the factorial
 		}
-		else if(opstr=="fib"){
-			rans = Eval(fct->right);
-			if(rans < 0){
+		else if(opstr=="fib"){ // compute the fibonacci of the given integer value 
+			rans = Eval(fct->right); // grab the right answer
+			if(rans < 0){ // if less than 0 throw an error
 				throw std::runtime_error("Fibonacci value must be non-negative.");
 			}
-			ans = fibonacci(rans.toInt());
+			int ransI;
+            try{ // attempt to convert to an integer and throw an exception if needed
+                ransI = rans.toInt();
+            }catch(InfIntException &e){
+                throw std::runtime_error(e.what());
+            }
+            ans = fibonacci(ransI);
 		}
-		else if(opstr=="sqrt"){
-			rans = Eval(fct->right);
-			if(rans < 0){
+		else if(opstr=="sqrt"){ // take the square root of an integer
+			rans = Eval(fct->right); 
+			if(rans < 0){ // if less than 0 throw an error
 				throw std::runtime_error("Square root value must be non-negative.");
 			}
-			ans = rans.intSqrt();
+			try{ // attempt to convert to an integer
+                ans = rans.intSqrt();
+            }catch(InfIntException &e){
+                throw std::runtime_error(e.what());
+            }
 		}
-		else if(operators.find(opstr)!= string::npos){
-			lans = Eval(fct->left);
-			rans = Eval(fct->right);
-			if (opstr == "+")
+		else if(operators.find(opstr)!= string::npos){ // if str in the operators string then it must be an operator this seemed convenient my bad if not to spec
+			lans = Eval(fct->left); // grab the left value 
+			rans = Eval(fct->right); // grab the right value
+            // below is the ifs for each operator that may exist in the string
+			if (opstr == "+") 
 				ans = lans + rans;
 			if (opstr == "-")
 				ans = lans - rans;
 			if (opstr == "*")
 				ans = lans * rans;
 			if (opstr == "/"){
-				if(rans ==0)
+				if(rans ==0) // if zero below the / then this is undefined behavior so we must handle this
 					throw std::runtime_error("Cannot divide by zero!");
 				ans = lans / rans;
 			}
 			if (opstr == "%"){
-				if(rans ==0)
+				if(rans ==0)// if zero below the / then this is undefined behavior so we must handle this
 					throw std::runtime_error("Cannot divide by zero!");
 				ans = lans % rans;
 			}
@@ -382,6 +411,7 @@ InfInt Function::Eval(ExpTreeNode *fct) {
 		}
 		return ans;
 	}
+	throw std::runtime_error("Undefined Behavior");
 }
 
 /*
@@ -411,11 +441,11 @@ string Function::toString(ExpTreeNode *t) {
 	ss.str("");
 
 	if (t) {
-		ss << "(";
+		//ss << "(";
 		ss << toString(t->left);
 		ss << t->data;
 		ss << toString(t->right);
-		ss << ")";
+		//ss << ")";
 	}
 	return ss.str();
 }
@@ -471,11 +501,11 @@ void Function::PrintFunctionTree(int Indent, int Level) {
  */
 void Function::PrintFunction(ExpTreeNode *t) {
 	if (t) {
-		cout << "(";
+		//cout << "(";
 		PrintFunction(t->left);
 		cout << t->data;
 		PrintFunction(t->right);
-		cout << ")";
+		//cout << ")";
 	}
 }
 
@@ -511,7 +541,7 @@ void Function::PrintFunctionPostfix(void) {
  */
 InfInt Function::factorial(int num)
 {
-	if(num >1){
+	if(num >1){ // if greater than 1 than recurse since any lower would be redundant and end with 0
 		return factorial(num-1)*num;
 	}
 	return 1;
