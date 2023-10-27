@@ -56,8 +56,7 @@ public:
 	RBTree();
 	virtual ~RBTree();
 
-	void insert(T);
-    void addElement(T);
+	virtual void insert(T);
 	void remove(T);
 
 	bool find(const T &item);
@@ -119,39 +118,6 @@ void RBTree<T>::insert(T val) {
 
 	//  Adjust the RB tree to retain the properties.
 	insertFix(newnode);
-}
-
-/*
- * Inserts a new node into the RB-Tree as with a standard BST but then calls the
- * insertFix function to adjust the tree back to an RB tree.
- */
-template<class T>
-void RBTree<T>::addElement(T val) {
-	RBTreeNode<T> *newnode = new RBTreeNode<T>(val, RED, NIL, NIL, NIL);
-	RBTreeNode<T> *y = NIL;
-	RBTreeNode<T> *x = root;
-
-	while (x != NIL) {
-		y = x;
-		if (val < x->value)
-			x = x->left;
-		else
-			x = x->right;
-	}
-	newnode->parent = y;
-	if (y == NIL)
-		root = newnode;
-	else if (newnode->value < y->value)
-		y->left = newnode;
-	else if(newnode->value != y->value)
-		y->right = newnode;
-
-	//  Adjust the RB tree to retain the properties.
-    // if the value is not in the tree insert it
-    if(newnode->value != y->value)
-        insertFix(newnode);
-    else 
-        delete newnode;
 }
 
 /*
@@ -441,12 +407,12 @@ template<class T>
 void RBTree<T>::PrintTree(RBTreeNode<T> *t, int Indent, int Level) {
 	if (t != NIL) {
 		PrintTree(t->right, Indent, Level + 1);
-
 		string RBstr;
 		if (t->color == RED)
 			RBstr = "R";
 		else
 			RBstr = "B";
+
 
 		IndentBlock(Indent * Level);
 		cout << t->value << " (" << RBstr << ")" << endl;
