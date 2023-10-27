@@ -27,7 +27,13 @@ int main() {
 	Function f;
 	vector<Function> ExpTreeList;
 
+<<<<<<< HEAD
     Header();
+=======
+
+	Header();
+
+>>>>>>> 5646b3f5d9cabf200ebd5b9a910e5d4814d73b75
     // for loop to run the simulator
 	for(int IOTracker = 1; exp!="exit"; IOTracker++){
         
