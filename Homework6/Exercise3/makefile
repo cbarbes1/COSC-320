@@ -7,7 +7,7 @@ OBJS = main.o
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-main.o : main.cpp RBTree.h set.h
+main.o : main.cpp RBTree.h map.h
 	$(CC) $(CPPFLAGS) -c main.cpp
 
 clean:

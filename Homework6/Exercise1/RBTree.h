@@ -108,12 +108,13 @@ void RBTree<T>::insert(T val) {
 		else
 			x = x->right;
 	}
+
 	newnode->parent = y;
 	if (y == NIL)
 		root = newnode;
 	else if (newnode->value < y->value)
 		y->left = newnode;
-	else
+	else if(newnode->value >= y->value)
 		y->right = newnode;
 
 	//  Adjust the RB tree to retain the properties.

@@ -15,75 +15,69 @@ int main()
 {
     
     srand(time(0)); // seed the rand
-    
-    multiset<int> dataSet1; // create the set
-    
-    // create needed container vars
-    int setSize1 = 0;
-    int randNum = 0;
-    
-    // take in the set size
-    cout<<"Please enter the size of the set: ";
-    cin>>setSize1;
-    
-    // insert random values into the tree
-    for(int i = 0; i<setSize1; i++){
-        randNum = rand()%10+1;
-        dataSet1.insert(randNum);
-    }
-    
-    multiset<int> dataSet2; // create the set
-    
-    // create needed container vars
-    int setSize2 = 0;
-    
-    // take in the set size
-    cout<<"Please enter the size of the set: ";
-    cin>>setSize2;
-    
-    // insert random values into the tree
-    for(int i = 0; i<setSize2; i++){
-        randNum = rand()%10+1;
-        dataSet2.insert(randNum);
+
+    multiset<int> dataSet1, dataSet2; // create the set
+    int signal = 0;
+
+    cout<<"How many values would you like to enter?";
+    cin>> signal;
+
+    for(int i = 0; i<signal; i++){
+        int num = rand()%signal+1;
+        dataSet1.insert(num);
+        dataSet2.insert(num);
     }
 
     cout<<dataSet1<<endl;
-    
+
     cout<<dataSet2<<endl;
 
-    if(dataSet1 == dataSet2)
-        cout<<"The sets are equivalent"<<endl;
-    else 
-        cout<<"The sets are not equivalent"<<endl;
+    int num = 0;
+    cout<<"Please enter an integer to test the set: ";
+    cin>>num;
 
-    if(dataSet2 < dataSet1)
-        cout<<"The second set is strict subset of the first"<<endl;
-    else
-        cout<<"Not a strict subset of the other"<<endl;
+    if(dataSet1.find(num)){
+        cout<<"value was found"<<endl;
+        dataSet1.erase(num);
+    }
 
-    cout<<"----------------------------------------"<<endl;
+    cout<<"Please enter values to erase from the set: ";
+    cin>>num;
 
-    if(dataSet1 < dataSet2)
-        cout<<"The first set is strict subset of the second"<<endl;
-    else
-        cout<<"Not a subset of the other"<<endl;
+    dataSet1.erase(num);
+
+    vector<int> testVect;
+
+    dataSet1.toVector(testVect);
+
+    for(unsigned int i = 0; i<testVect.size(); i++){
+        cout<<testVect[i]<<" ";
+    }
+    cout<<endl;
+
 
     multiset<int> hello = dataSet1 + dataSet2;
     cout<<hello<<endl;
-    
-    multiset<int> difference = dataSet1-dataSet2;
+
+    if(dataSet1 < hello)
+        cout<<"First data set is a strict subset of the union!"<<endl;
+
+    if(dataSet1 <= dataSet1)
+        cout<<"First data Set is a subset of itself!"<<endl;
+
+    if(dataSet1 == dataSet1)
+        cout<<"First is equal to itself"<<endl;
+
+    multiset<int> difference = dataSet2-dataSet1;
     cout<<difference<<endl;
 
     multiset<int> intersection = dataSet1*dataSet2;
     cout<<intersection<<endl;
-    
-    cout<<dataSet1.count(10)<<endl;
 
     cout<<dataSet1.size()<<endl;
     dataSet1.clear();
     dataSet2.clear();
-    
-    
+
 
     return 0;
 }

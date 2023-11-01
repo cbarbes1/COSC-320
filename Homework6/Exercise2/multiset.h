@@ -83,6 +83,13 @@ multiset<T>::multiset()
 {
 }
 
+template<class T>
+multiset<T>::~multiset()
+{
+    clear();
+}
+
+
 /*
  * copy each node recursively in a sub tree pointed to by nodePtr
  */
@@ -195,6 +202,8 @@ void multiset<T>::clear()
 template<class T>
 int multiset<T>::count(T val)
 {
+    if(RBTree<T>::root == RBTree<T>::NIL)
+        return 0;
     int count = 0;
     InOrdercount(RBTree<T>::root, val, count);
     return count;
@@ -208,10 +217,6 @@ multiset<T>::multiset(const multiset<T> &right)
     copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
 }
 
-template<class T>
-multiset<T>::~multiset()
-{
-}
 
 /*
  * Description: Insert function which calls the addElement function and only adds a non copy function
@@ -369,29 +374,23 @@ multiset<T> multiset<T>::operator+(multiset<T>& right)
     vector<T> vect2;
     right.toVector(vect2);
     multiset<T> temp;
-    for(int i = 0; i<vect1.size(); i++)
-        temp.insert(vect1[i]);
-        
-    for(int i = 0; i<vect2.size(); i++)
-        temp.insert(vect2[i]);
-    
-    vector<T> vect3;
-    temp.toVector(vect3);
-    
-    for(unsigned int i = 0; i<vect1.size(); i++){
+
+    for(int i = 0; i<vect1.size(); i++){
         int freq1 = count(vect1[i]);
         int freq2 = right.count(vect1[i]);
-        if(freq1 < freq2){
-            for(int j = 0; j < freq1; j++)
-                temp.erase(vect1[i]);
-            i+=freq1;
-        }else{
-            for(int j = 0; j < freq2; j++)
-                temp.erase(vect1[i]);
-            i+=freq2;
+        if(freq1 >= freq2){
+            temp.insert(vect1[i]);
         }
     }
-        
+
+
+    for(int i = 0; i<vect2.size(); i++){
+        int freq1 = count(vect2[i]);
+        int freq2 = right.count(vect2[i]);
+        if(freq1 < freq2){
+            temp.insert(vect2[i]);
+        }
+    }
     return temp;
 }
 
@@ -407,7 +406,7 @@ multiset<T> multiset<T>::operator-(multiset<T>& right)
         temp.insert(vect1[i]);
         
     for(unsigned int i = 0; i<vect2.size(); i++)
-        temp.erase(vect2[i]);
+            temp.erase(vect2[i]);
         
     return temp;
 }
@@ -420,7 +419,7 @@ multiset<T> multiset<T>::operator*(multiset<T>& right)
     toVector(vect);
     
     for(unsigned int i = 0; i<vect.size(); i++){
-        if(right.find(vect[i]))
+        if(right.find(vect[i]) && count(vect[i]) > right.count(vect[i]))
             temp.insert(vect[i]);
     }
     

@@ -16,95 +16,68 @@ int main()
     
     srand(time(0)); // seed the rand
     
-    set<int> dataSet; // create the set
-    
-    // create needed container vars
-    int setSize = 0;
-    int randNum = 0;
-    
-    // take in the set size
-    cout<<"Please enter the size of the set: ";
-    cin>>setSize;
-    
-    if(dataSet.empty()){
-        cout<<"The set is empty { }"<<endl;
+    set<int> dataSet1, dataSet2; // create the set
+    int signal = 0;
+
+    cout<<"How many values would you like to enter?";
+    cin>> signal;
+
+    for(int i = 0; i<signal; i++){
+        int num = rand()%signal+1;
+        dataSet1.insert(num);
     }
-    // insert random values into the tree
-    for(int i = 0; i<setSize; i++){
-        randNum = rand()%1000+1;
-        while(dataSet.find(randNum))
-            randNum = rand()%1000+1;
-        dataSet.insert(randNum);
+    cout<<dataSet1<<endl;
+
+    for(int i = 0; i<signal; i++){
+        int num = rand()%signal+1;
+        dataSet2.insert(num);
     }
 
-    cout<<dataSet<<endl;
+    cout<<dataSet2<<endl;
 
-    set<int> newData = dataSet;
+    int num = 0;
+    cout<<"Please enter an integer to test the set: ";
+    cin>>num;
 
-    if(dataSet.empty()){
-        cout<<"The set is empty { }"<<endl;
-    }else{
-        cout<<"NOT EMPTY"<<endl;
+    if(dataSet1.find(num)){
+        cout<<"value was found"<<endl;
+        dataSet1.erase(num);
     }
 
-    cout<<"----------------------------------------"<<endl;
+    cout<<"Please enter values to erase from the set: ";
+    cin>>num;
 
-    vector<int> stuff;
+    dataSet1.erase(num);
 
-    newData.toVector(stuff);
+    vector<int> testVect;
 
-    int *array = new int[setSize];
+    dataSet1.toVector(testVect);
 
-    dataSet.toArray(array, setSize);
-
-    for(int i = 0; i<setSize; i++){
-        cout<<stuff[i]<<" ";
-       // cout<<array[i]<<" ";
+    for(unsigned int i = 0; i<testVect.size(); i++){
+        cout<<testVect[i]<<" ";
     }
     cout<<endl;
-    cout<<newData;
 
-    cout<<"----------------------------------------"<<endl;
 
-    for(int i = 0; i<setSize; i++){
-       // cout<<stuff[i]<<" ";
-       cout<<array[i]<<" ";
-    }
-    cout<<endl;
-    cout<<dataSet<<endl;
-
-    cout<<"----------------------------------------"<<endl;
-
-    if(newData == dataSet)
-        cout<<"The sets are equivalent"<<endl;
-
-    if(newData < dataSet)
-        cout<<"The second set is strict subset of the first"<<endl;
-    else
-        cout<<"Not a strict subset of the other"<<endl;
-
-    cout<<"----------------------------------------"<<endl;
-    // get a random value to find in the tree
-    randNum = (rand()%setSize+1);
-    bool tester = dataSet.find(randNum);
-    newData.erase(randNum);
-
-    if(newData < dataSet)
-        cout<<"The second set is strict subset of the first"<<endl;
-    else
-        cout<<"Not a subset of the other"<<endl;
-
-    set<int> hello = dataSet + newData;
+    set<int> hello = dataSet1 + dataSet2;
     cout<<hello<<endl;
+
+    if(dataSet1 < hello)
+        cout<<"First data set is a strict subset of the union!"<<endl;
+
+    if(dataSet1 <= dataSet1)
+        cout<<"First data Set is a subset of itself!"<<endl;
+
+    if(dataSet1 == dataSet1)
+        cout<<"First is equal to itself"<<endl;
     
-    set<int> difference = dataSet-newData;
+    set<int> difference = dataSet2-dataSet1;
     cout<<difference<<endl;
 
-    set<int> intersection = dataSet*newData;
+    set<int> intersection = dataSet1*dataSet2;
     cout<<intersection<<endl;
     
-    cout<<dataSet.size()<<endl;
-    dataSet.clear();
+    cout<<dataSet1.size()<<endl;
 
     return 0;
 }

@@ -1,7 +1,7 @@
 /******************************************************************************************************
  * Authors: Cole Barbes and Harrison Colborne
  * Creation Date: 10/18/23
- * Last Edited: 10/18/23
+ * Last Edited: 10/31/23
  * Description: implementation of a set class similar to the stl set 
 ******************************************************************************************************/
 #ifndef SET_H
@@ -17,23 +17,26 @@ using namespace std;
 template<class T>
 class set : public RBTree<T>{
 private:
+    // below are all recursive private functions for use by the other functions
     void copy(RBTreeNode<T>*, RBTreeNode<T>*&, RBTreeNode<T>*, RBTreeNode<T> *NilPtr);
+
+    // in order recursive functions
     ostream& InOrderDisplay(RBTreeNode<T> *, ostream&);
     void InOrderVector(RBTreeNode<T>*, vector<T>&);
     void InOrderArray(RBTreeNode<T>*, T [], int &n, const int);
-
     bool InOrderSubset(RBTreeNode<T>*, set<T>&);
     bool InOrderSubset(RBTreeNode<T>*, RBTreeNode<T>*);
+    void InOrderInsert(RBTreeNode<T>*, set<T> &other);
+    void InOrderErase(RBTreeNode<T>*, set<T> &other);
 public:
     set();
     set(const set<T>&);
-    ~set();
+    virtual ~set();
     
     // insert a value into the set
     void insert(T);
     // find a value 
-    bool find(T);void addElementRec(RBTreeNode<T>*);
-    void deleteElementRec(RBTreeNode<T>*);
+    bool find(T);
     //erase a value from the set
     void erase(T);
     // empty function to check if empty
@@ -42,43 +45,54 @@ public:
     void toVector(vector<T>&);
     // convert the set to an array
     void toArray(T arr[], const int size);
-    
-    int size();
-    
-    void clear();
+    int size(); // return the size
+    void clear(); // clear the set
 
     // overloaded assignment operator
     set<T> operator=(const set<T>& right);
-
+    // overloaded operators
     bool operator==(set<T>& right);
-
     bool operator!=(set<T>& right);
-
     bool operator<(set<T>& right);
-
     bool operator>(set<T>& right);
-
     bool operator<=(set<T>& right);
-
     bool operator>=(set<T>& right);
-
-    set<T> operator+(set<T>& right);
-
-    set<T> operator-(set<T>& right);
-    
-    set<T> operator*(set<T>& right);
-
+    set<T> operator+(set<T> right);
+    set<T> operator-(set<T> right);
+    set<T> operator*(set<T> right);
     template<class c>
     friend ostream& operator<<(ostream& os, set<c>& obj);
 };
-    
+
+/*
+ * empty constructor
+ */
 template<class T>
 set<T>::set()
 {
 }
 
 /*
+ * destructor which has no purpose
+ */
+template<class T>
+set<T>::~set()
+{
+}
+
+/*
+ * copy constructor for the set
+ * parameters: the right set
+ */
+template<class T>
+set<T>::set(const set<T> &right)
+{
+    copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
+}
+
+/*
  * copy each node recursively in a sub tree pointed to by nodePtr
+ * parameters: the node of the other subtree, the next node of the next subtree, the parent of this subtree, the nil of the other tree
  */
 template<class T>
 void set<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<T> *parent, RBTreeNode<T> *NilPtr)
@@ -90,6 +104,11 @@ void set<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<T> *p
     }
 }
 
+/*
+ * display the set in InOrder
+ * parameters: the subtree pointer, the outstream var by reference
+ * return the stream
+ */
 template<class T>
 ostream& set<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm)
 {
@@ -101,6 +120,10 @@ ostream& set<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm)
     return strm;
 }
 
+/*
+ * insert the set into a vector using an in order traversal
+ * paremeters: the node of the subtree, the vector
+ */
 template<class T>
 void set<T>::InOrderVector(RBTreeNode<T> *nodePtr, vector<T>& vect)
 {
@@ -111,6 +134,10 @@ void set<T>::InOrderVector(RBTreeNode<T> *nodePtr, vector<T>& vect)
     }
 }
 
+/*
+ * insert the set into an array using an in order traversal
+ * parameters: the node of the subtree, the array, the number of elements that have been inserted, the size of the array
+ */
 template<class T>
 void set<T>::InOrderArray(RBTreeNode<T> *nodePtr, T arr[], int &n, const int size)
 {
@@ -121,6 +148,11 @@ void set<T>::InOrderArray(RBTreeNode<T> *nodePtr, T arr[], int &n, const int siz
     }
 }
 
+/*
+ * check if A is a subset of B
+ * parameters: node of the subtree, the other set which is being compared to
+ * return whether this is a subset of the other
+ */
 template<class T>
 bool set<T>::InOrderSubset(RBTreeNode<T> *nodePtr, set<T> &other)
 {
@@ -132,6 +164,11 @@ bool set<T>::InOrderSubset(RBTreeNode<T> *nodePtr, set<T> &other)
     return true;
 }
 
+/*
+ * check if A is a subset of B
+ * parameters: the pointer to the other set node, and the nil of that set
+ * return whether this A is a subset of B
+ */
 template<class T>
 bool set<T>::InOrderSubset(RBTreeNode<T> *nodePtr, RBTreeNode<T> *nilPtr)
 {
@@ -144,15 +181,49 @@ bool set<T>::InOrderSubset(RBTreeNode<T> *nodePtr, RBTreeNode<T> *nilPtr)
 }
 
 /*
+ * insert the set into a another using an in order traversal
+ * parameters: the node and the other set
+ */
+template<class T>
+void set<T>::InOrderInsert(RBTreeNode<T> *nodePtr, set<T> &other)
+{
+    if(nodePtr != RBTree<T>::NIL){
+        InOrderInsert(nodePtr->left, other);
+        other.insert(nodePtr->value);
+        InOrderInsert(nodePtr->right, other);
+    }
+}
+
+/*
+ * insert the set into a vector using an in order traversal
+ * parameters: the node of this set and the other set being erased from
+ */
+template<class T>
+void set<T>::InOrderErase(RBTreeNode<T> *nodePtr, set<T> &other)
+{
+    if(nodePtr != RBTree<T>::NIL){
+        InOrderErase(nodePtr->left, other);
+        other.erase(nodePtr->value);
+        InOrderErase(nodePtr->right, other);
+    }
+}
+
+
+/*
  * overload the assignment operator
+ * parameters: the right set
+ * return the set
  */
 template<class T>
 set<T> set<T>::operator=(const set<T>& right)
 {
-    RBTree<T>::destroySubTree(RBTree<T>::root);
+    clear();
     copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
 }
 
+/*
+ * return the size of the set
+ */
 template<class T>
 int set<T>::size()
 {
@@ -164,31 +235,21 @@ int set<T>::size()
     return size;
 }
 
+/*
+ * clear the set
+ */
 template<class T>
 void set<T>::clear()
 {
-    vector<T> V;
-    toVector(V);
-    
-    for(unsigned int i = 0; i<V.size(); i++)
-        erase(V[i]);
+    RBTree<T>::destroySubTree(RBTree<T>::root);
+    delete RBTree<T>::NIL;
 }
 
-template<class T>
-set<T>::set(const set<T> &right)
-{
-    copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
-}
-
-template<class T>
-set<T>::~set()
-{
-}
 
 /*
  * Description: Insert function which calls the addElement function and only adds a non copy function
  * Parameters: item to be added
- */
+*/
 template<class T>
 void set<T>::insert(T val)
 {
@@ -200,27 +261,27 @@ void set<T>::insert(T val)
 		y = x;
 		if (val < x->value)
 			x = x->left;
-		else
+		else if(val > x->value)
 			x = x->right;
+        else{
+            delete newnode;
+            return;
+        }
 	}
 
-	if(newnode->value == y->value){
-        delete newnode;
-        return;
-    }
+    newnode->parent = y;
+    if (y == RBTree<T>::NIL)
+        RBTree<T>::root = newnode;
+    else if (newnode->value < y->value)
+        y->left = newnode;
+    else if(newnode->value > y->value)
+        y->right = newnode;
 
-	newnode->parent = y;
-	if (y == RBTree<T>::NIL)
-		RBTree<T>::root = newnode;
-	else if (newnode->value < y->value)
-		y->left = newnode;
-	else if(newnode->value > y->value)
-		y->right = newnode;
-
-	//  Adjust the RB tree to retain the properties.
+    //  Adjust the RB tree to retain the properties.
     // if the value is not in the tree insert it
     RBTree<T>::insertFix(newnode);
 }
+
 
 
 /*
@@ -301,92 +362,77 @@ void set<T>::toArray(T arr[], const int size)
     InOrderArray(RBTree<T>::root, arr, n,  size);
 }
 
+// overload the == operator
 template<class T>
 bool set<T>::operator==(set<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right) && InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL);
 }
 
+// overload the != operator
 template<class T>
 bool set<T>::operator!=(set<T>& right)
 {
     return !(InOrderSubset(RBTree<T>::root, right) && InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL));
 }
 
+// overload the < operator
 template<class T>
 bool set<T>::operator<(set<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right) && !(InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL));
 }
 
+// overload the > operator
 template<class T>
 bool set<T>::operator>(set<T>& right)
 {
     return InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL) && !(InOrderSubset(RBTree<T>::root, right));
 }
 
+// overload the <= operator
 template<class T>
 bool set<T>::operator<=(set<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right);
 }
 
+// overload the >= operator
 template<class T>
 bool set<T>::operator>=(set<T>& right)
 {
     return InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL);
 }
 
-
+// overload the + operator
 template<class T>
-set<T> set<T>::operator+(set<T>& right)
+set<T> set<T>::operator+(set<T> right)
 {
-    vector<T> vect1;
-    toVector(vect1);
-    vector<T> vect2;
-    right.toVector(vect2);
-    set<T> temp;
-    for(int i = 0; i<vect1.size(); i++)
-        temp.insert(vect1[i]);
-        
-    for(int i = 0; i<vect2.size(); i++)
-        temp.insert(vect2[i]);
-        
+    set<T> temp(*this);
+    right.InOrderInsert(right.RBTree<T>::root, temp);
     return temp;
 }
 
+// overload the - operator
 template<class T>
-set<T> set<T>::operator-(set<T>& right)
+set<T> set<T>::operator-(set<T> right)
 {
-    vector<T> vect1;
-    toVector(vect1);
-    vector<T> vect2;
-    right.toVector(vect2);
-    set<T> temp;
-    for(unsigned int i = 0; i<vect1.size(); i++)
-        temp.insert(vect1[i]);
-        
-    for(unsigned int i = 0; i<vect2.size(); i++)
-        temp.erase(vect2[i]);
-        
+    set<T> temp(*this);
+
+    right.InOrderErase(right.RBTree<T>::root, temp);
+
     return temp;
 }
 
+// overload the * operator
 template<class T>
-set<T> set<T>::operator*(set<T>& right)
+set<T> set<T>::operator*(set<T> right)
 {
-    set<T> temp;
-    vector<T> vect;
-    toVector(vect);
-    
-    for(int i = 0; i<vect.size(); i++){
-        if(right.find(vect[i]))
-            temp.insert(vect[i]);
-    }
-    
+    set<T> temp((*this + right) - ((*this - right)+(right - *this)));
     return temp;
 }
 
+// overload the << operator
 template<class T>
 ostream& operator<<(ostream& os, set<T>& obj)
 {

@@ -59,10 +59,10 @@ public:
 	virtual ~RBTree();
 
 	virtual void insert(T, V);
-	void remove(T, V);
+	void remove(T);
 
-	bool find(const T &key, const V &value);
-	RBTreeNode<T, V>* findNode(const T&, const V&);
+	bool find(const T &key);
+	RBTreeNode<T, V>* findNode(const T&);
 
 	void PrintTree(int Indent = 4, int Level = 0);
 };
@@ -110,6 +110,7 @@ void RBTree<T, V>::insert(T key, V val) {
 		else
 			x = x->right;
 	}
+
 	newnode->parent = y;
 	if (y == NIL)
 		root = newnode;
@@ -309,8 +310,8 @@ void RBTree<T, V>::deleteFix(RBTreeNode<T, V> *x) {
  * against the NIL object.
  */
 template<class T, class V>
-bool RBTree<T, V>::find(const T &k, const V &val) {
-	return findNode(k, val) != NIL;
+bool RBTree<T, V>::find(const T &k) {
+	return findNode(k) != NIL;
 }
 
 /*
@@ -375,13 +376,13 @@ void RBTree<T, V>::LeftRotation(RBTreeNode<T, V> *x) {
  * Recursive find function that finds the first node containing the value item.
  */
 template<class T, class V>
-RBTreeNode<T, V>* RBTree<T, V>::findNode(const T &k, const V &value) {
+RBTreeNode<T, V>* RBTree<T, V>::findNode(const T &k) {
 	RBTreeNode<T, V> *nodePtr = root;
 
 	while (nodePtr != NIL) {
 		if (nodePtr->key == k)
 			return nodePtr;
-		else if (K < nodePtr->key)
+		else if (k < nodePtr->key)
 			nodePtr = nodePtr->left;
 		else
 			nodePtr = nodePtr->right;
