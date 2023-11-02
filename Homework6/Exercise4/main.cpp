@@ -8,29 +8,29 @@
 #include <ctime>
 #include <vector>
 
-#include "map.h"
+#include "multimap.h"
 
 using namespace std;
 
 int main()
 {
     // create empty set
-    map<int, string> tester;
+    multimap<int, string> tester;
 
     int signal = 0;
 
     // get the size from command line
-    cout<<"Enter number of data items to enter into the map:";
+    cout<<"Enter number of data items to enter into the multimap:";
     cin>>signal;
 
     // get the key value pairs
     for(int i = 0; i<signal; i++){
         int key = 0;
-        cout<<"Please enter a key to enter in to the map: ";
+        cout<<"Please enter a key to enter in to the multimap: ";
         cin>>key;
 
         string value = "";
-        cout<<"Please enter a value to enter into the map: ";
+        cout<<"Please enter a value to enter into the multimap: ";
         cin>>value;
 
         tester.set(key, value);
@@ -39,29 +39,34 @@ int main()
 
     cout<<tester<<endl;
 
-    map<int, string> newTester = tester;
+    multimap<int, string> newTester = tester;
 
-    map<int, string> newGuy;
+    multimap<int, string> newGuy;
 
     newGuy = tester;
 
-    cout<<"Copy constructed map: "<<newTester<<endl;
+    cout<<"Copy constructed multimap: "<<newTester<<endl;
 
     if(newGuy.empty()){
-        cout<<"The map is empty"<<endl;
+        cout<<"The multimap is empty"<<endl;
     }
 
-    cout<<"Equal operator map: "<<newGuy<<endl;
+    cout<<"Equal operator multimap: "<<newGuy<<endl;
 
     if(!tester.empty()){
-        cout<<"The map is not empty"<<endl;
+        cout<<"The multimap is not empty"<<endl;
     }
 
     int tmp = 0;
-    cout<<"enter a key in the map"<<endl;
+    cout<<"enter a key in the multimap"<<endl;
     cin>>tmp;
 
-    cout<<newGuy.get(tmp)<<endl;
+    vector<string> newVect = newGuy.get(tmp);
+    
+    for(unsigned int i = 0; i<newVect.size(); i++){
+        cout<<newVect[i];
+    }
+    cout<<endl;
     
     return 0;
 }

@@ -28,14 +28,15 @@ private:
     bool InOrderSubset(RBTreeNode<T, RBT<V>>*, multimap<T, RBT<V>>&);
     bool InOrderSubset(RBTreeNode<T, RBT<V>>*, RBTreeNode<T, RBT<V>>*);
     int InOrderNumPairs(RBTreeNode<T, RBT<V>> *, int&);
+   
     
 public:
     multimap();
-    multimap(const multimap<T, RBT<V>>&);
+    multimap(const multimap<T, V>&);
     virtual ~multimap();
 
     // insert a value into the multimap
-    void insert(T, RBT<V>);
+    void insert(T, V);
     // find a value
     bool find(T);
     //erase a value from the multimap
@@ -43,18 +44,18 @@ public:
     // empty function to check if empty
     bool empty();
 
-    RBT<V> get(T key);
+    vector<V> get(T key);
 
-    void set(T key, RBT<V> value);
+    void set(T key, V value);
 
     int size(); // return the size
     void clear(); // clear the multimap
 
     // overloaded assignment operator
-    multimap<T, RBT<V>> operator=(const multimap<T, RBT<V>>& right);
+    multimap<T, V> operator=(const multimap<T, V>& right);
     // overloaded operators
-    bool operator==(multimap<T, RBT<V>>& right);
-    bool operator!=(multimap<T, RBT<V>>& right);
+    bool operator==(multimap<T, V>& right);
+    bool operator!=(multimap<T, V>& right);
     template<class c, class m>
     friend ostream& operator<<(ostream& os, multimap<c, m>& obj);
 };
@@ -63,7 +64,7 @@ public:
  * empty constructor
  */
 template<class T, class V>
-multimap<T, RBT<V>>::multimap()
+multimap<T, V>::multimap()
 {
 }
 
@@ -71,7 +72,7 @@ multimap<T, RBT<V>>::multimap()
  * destructor which has no purpose
  */
 template<class T, class V>
-multimap<T, RBT<V>>::~multimap()
+multimap<T, V>::~multimap()
 {
 }
 
@@ -80,7 +81,7 @@ multimap<T, RBT<V>>::~multimap()
  * parameters: the right multimap
  */
 template<class T, class V>
-multimap<T, RBT<V>>::multimap(const multimap<T, RBT<V>> &right)
+multimap<T, V>::multimap(const multimap<T, V> &right)
 {
     copy(right.RBTree<T, RBT<V>>::root, RBTree<T, RBT<V>>::root, RBTree<T, RBT<V>>::NIL, right.RBTree<T, RBT<V>>::NIL);
 }
@@ -90,7 +91,7 @@ multimap<T, RBT<V>>::multimap(const multimap<T, RBT<V>> &right)
  * parameters: the node of the other subtree, the next node of the next subtree, the parent of this subtree, the nil of the other tree
  */
 template<class T, class V>
-void multimap<T, RBT<V>>::copy(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNode<T, RBT<V>> *&next, RBTreeNode<T, RBT<V>> *parent, RBTreeNode<T, RBT<V>> *NilPtr)
+void multimap<T, V>::copy(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNode<T, RBT<V>> *&next, RBTreeNode<T, RBT<V>> *parent, RBTreeNode<T, RBT<V>> *NilPtr)
 {
     if(nodePtr != NilPtr){
         next = new RBTreeNode<T, RBT<V>>(nodePtr->key, nodePtr->value, nodePtr->color, RBTree<T, RBT<V>>::NIL, RBTree<T, RBT<V>>::NIL, parent);
@@ -105,11 +106,11 @@ void multimap<T, RBT<V>>::copy(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNode<T, RBT
  * return the stream
  */
 template<class T, class V>
-ostream& multimap<T, RBT<V>>::InOrderDisplay(RBTreeNode<T, RBT<V>> *nodePtr, ostream &strm, int &count)
+ostream& multimap<T, V>::InOrderDisplay(RBTreeNode<T, RBT<V>> *nodePtr, ostream &strm, int &count)
 {
     if(nodePtr != RBTree<T, RBT<V>>::NIL){
         InOrderDisplay(nodePtr->left, strm, count);
-        strm<<"("<<nodePtr->key<<", "<<nodePtr->value<<")";
+        strm<<"("<<nodePtr->key<<", "<<(nodePtr->value).toString()<<")";
         if(count!=(size()-1)){
             strm<<", ";
             count++;
@@ -125,7 +126,7 @@ ostream& multimap<T, RBT<V>>::InOrderDisplay(RBTreeNode<T, RBT<V>> *nodePtr, ost
  * return whether this is a submultimap of the other
  */
 template<class T, class V>
-bool multimap<T, RBT<V>>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, multimap<T, RBT<V>> &other)
+bool multimap<T, V>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, multimap<T, RBT<V>> &other)
 {
     if(nodePtr != RBTree<T, RBT<V>>::NIL){
         bool left = InOrderSubset(nodePtr->left, other);
@@ -141,7 +142,7 @@ bool multimap<T, RBT<V>>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, multimap
  * return whether this A is a submultimap of B
  */
 template<class T, class V>
-bool multimap<T, RBT<V>>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNode<T, RBT<V>> *nilPtr)
+bool multimap<T, V>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNode<T, RBT<V>> *nilPtr)
 {
     if(nodePtr != nilPtr){
         bool left = InOrderSubset(nodePtr->left, nilPtr);
@@ -157,7 +158,7 @@ bool multimap<T, RBT<V>>::InOrderSubset(RBTreeNode<T, RBT<V>> *nodePtr, RBTreeNo
  * return the count of the multimap
  */
 template<class T, class V>
-int multimap<T, RBT<V>>::InOrderNumPairs(RBTreeNode<T, RBT<V>> *nodePtr, int &count)
+int multimap<T, V>::InOrderNumPairs(RBTreeNode<T, RBT<V>> *nodePtr, int &count)
 {
     if(nodePtr != RBTree<T, RBT<V>>::NIL){
         InOrderNumPairs(nodePtr->left, count);
@@ -167,13 +168,15 @@ int multimap<T, RBT<V>>::InOrderNumPairs(RBTreeNode<T, RBT<V>> *nodePtr, int &co
     return count;
 }
 
+
+
 /*
  * overload the assignment operator
  * parameters: the right multimap
  * return the multimap
  */
 template<class T, class V>
-multimap<T, RBT<V>> multimap<T, RBT<V>>::operator=(const multimap<T, RBT<V>>& right)
+multimap<T, V> multimap<T, V>::operator=(const multimap<T, V>& right)
 {
     clear();
     copy(right.RBTree<T, RBT<V>>::root, RBTree<T, RBT<V>>::root, RBTree<T, RBT<V>>::NIL, right.RBTree<T, RBT<V>>::NIL);
@@ -184,7 +187,7 @@ multimap<T, RBT<V>> multimap<T, RBT<V>>::operator=(const multimap<T, RBT<V>>& ri
  * return the size of the multimap
  */
 template<class T, class V>
-int multimap<T, RBT<V>>::size()
+int multimap<T, V>::size()
 {
     int size = 0;
     
@@ -197,7 +200,7 @@ int multimap<T, RBT<V>>::size()
  * clear the multimap
  */
 template<class T, class V>
-void multimap<T, RBT<V>>::clear()
+void multimap<T, V>::clear()
 {
     RBTree<T, RBT<V>>::destroySubTree(RBTree<T, RBT<V>>::root);
 }
@@ -208,7 +211,7 @@ void multimap<T, RBT<V>>::clear()
  * Parameters: item to be added
 */
 template<class T, class V>
-void multimap<T, RBT<V>>::insert(T key, V val)
+void multimap<T, V>::insert(T key, V val)
 {
     RBT<V> newValSet;
     newValSet.insert(val);
@@ -223,7 +226,7 @@ void multimap<T, RBT<V>>::insert(T key, V val)
 		else if(key > x->key)
 			x = x->right;
         else{
-            x->value.set(val);
+            x->value.RBT<V>::insert(val);
             delete newnode;
             return;
         }
@@ -248,7 +251,7 @@ void multimap<T, RBT<V>>::insert(T key, V val)
  * Find a value in the multimap
  */
 template<class T, class V>
-bool multimap<T, RBT<V>>::find(T key)
+bool multimap<T, V>::find(T key)
 {
     return RBTree<T, RBT<V>>::find(key);
 }
@@ -258,7 +261,7 @@ bool multimap<T, RBT<V>>::find(T key)
  * Erase a value from the tree
  */
 template<class T, class V>
-void multimap<T, RBT<V>>::erase(T key)
+void multimap<T, V>::erase(T key)
 {
     RBTreeNode<T, RBT<V>> *z = RBTree<T, RBT<V>>::findNode(key);
 	if (z == RBTree<T, RBT<V>>::NIL)
@@ -298,7 +301,7 @@ void multimap<T, RBT<V>>::erase(T key)
 
 // empty function to check if empty
 template<class T, class V>
-bool multimap<T, RBT<V>>::empty()
+bool multimap<T, V>::empty()
 {
     bool checker = false;
 
@@ -309,36 +312,38 @@ bool multimap<T, RBT<V>>::empty()
 }
 
 template<class T, class V>
-RBT<V> multimap<T, RBT<V>>::get(T key)
+vector<V> multimap<T, V>::get(T key)
 {
     if(!find(key))
         throw std::runtime_error("Pair not in the set");
-    return RBTree<T, RBT<V>>::findNode(key)->value;
+    vector<V> vect;
+    RBTree<T, RBT<V>>::findNode(key)->toVector(vect);
+    return vect;
 }
 
 template<class T, class V>
-void multimap<T, RBT<V>>::set(T key, RBT<V> value)
+void multimap<T, V>::set(T key, V value)
 {
     insert(key, value);
 }
 
 // overload the == operator
 template<class T, class V>
-bool multimap<T, RBT<V>>::operator==(multimap<T, RBT<V>>& right)
+bool multimap<T, V>::operator==(multimap<T, V>& right)
 {
     return InOrderSubset(RBTree<T, RBT<V>>::root, right) && InOrderSubset(right.RBTree<T, RBT<V>>::root, right.RBTree<T, RBT<V>>::NIL);
 }
 
 // overload the != operator
 template<class T, class V>
-bool multimap<T, RBT<V>>::operator!=(multimap<T, RBT<V>>& right)
+bool multimap<T, V>::operator!=(multimap<T, V>& right)
 {
     return !(InOrderSubset(RBTree<T, RBT<V>>::root, right) && InOrderSubset(right.RBTree<T, RBT<V>>::root, right.RBTree<T, RBT<V>>::NIL));
 }
 
 // overload the << operator
 template<class T, class V>
-ostream& operator<<(ostream& os, multimap<T, RBT<V>>& obj)
+ostream& operator<<(ostream& os, multimap<T, V>& obj)
 {
     os<<"{ ";
     int count = 0;

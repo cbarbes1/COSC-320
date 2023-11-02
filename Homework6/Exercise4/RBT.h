@@ -2,11 +2,12 @@
 #define RBT_H_
 
 #include <string>
+#include <sstream>
 
 using namespace std;
 
-enum color_t {
-	RED, BLACK
+enum ccolor_t {
+	RRED, BBLACK
 // Red = 0, Black = 1
 };
 
@@ -14,7 +15,7 @@ template<class T>
 class RBTNode {
 public:
 	T value;
-	color_t color;
+	ccolor_t color;
 	RBTNode *left;
 	RBTNode *right;
 	RBTNode *parent;
@@ -23,10 +24,10 @@ public:
 		left = nullptr;
 		right = nullptr;
 		parent = nullptr;
-		color = RED;
+		color = RRED;
 	}
 
-	RBTNode(T val, color_t col, RBTNode *l, RBTNode *r,
+	RBTNode(T val, ccolor_t col, RBTNode *l, RBTNode *r,
 			RBTNode *p) {
 		value = val;
 		left = l;
@@ -53,6 +54,12 @@ protected:
 	RBTNode<T>* getMinNode(RBTNode<T>*);
 
 	void destroySubTree(RBTNode<T>*);
+    
+    int InOrdercount(RBTNode<T> *, int &);
+    
+    string InOrderDisplay(RBTNode<T> *, string&, int &);
+    
+    void InOrderVector(RBTNode<T>*, vector<T>&);
 
 public:
 	RBT();
@@ -60,16 +67,22 @@ public:
 
 	virtual void insert(T);
 	void remove(T);
+    
+    int size(); // return the size
 
 	bool find(const T &item);
 	RBTNode<T>* findNode(const T&);
 
 	void PrintTree(int Indent = 4, int Level = 0);
+    
+    string toString();
+    
+    vector<T> toVector(vector<T> &vect);
 };
 
 template<class T>
 RBT<T>::RBT() {
-	NIL = new RBTNode<T>(T(), BLACK, nullptr, nullptr, nullptr);
+	NIL = new RBTNode<T>(T(), BBLACK, nullptr, nullptr, nullptr);
 	root = NIL;
 }
 
@@ -94,12 +107,63 @@ void RBT<T>::destroySubTree(RBTNode<T> *nodePtr) {
 }
 
 /*
+ * count number of elements
+ * parameters: the subtree pointer, the count variable
+ * return the count of the multimap
+ */
+template<class T>
+int RBT<T>::InOrdercount(RBTNode<T> *nodePtr, int &count)
+{
+    if(nodePtr != NIL){
+        InOrdercount(nodePtr->left, count);
+        count++;
+        InOrdercount(nodePtr->right, count);
+    }
+    return count;
+}
+
+/*
+ * insert the set into a vector using an in order traversal
+ * paremeters: the node of the subtree, the vector
+ */
+template<class T>
+void RBT<T>::InOrderVector(RBTNode<T> *nodePtr, vector<T>& vect)
+{
+    // if nil is encountered then stop
+    if(nodePtr != NIL){
+        InOrderVector(nodePtr->left, vect);
+        vect.push_back(nodePtr->value);
+        InOrderVector(nodePtr->right, vect);
+    }
+}
+
+// convert the set to a vector
+template<class T>
+void set<T>::toVector(vector<T>& vect)
+{
+    InOrderVector(RBTree<T>::root, vect);
+}
+
+/*
+ * return the size of the multimap
+ */
+template<class T>
+int RBT<T>::size()
+{
+    int size = 0;
+    
+    InOrdercount(root, size);
+
+    return size;
+}
+
+/*
  * Inserts a new node into the RB-Tree as with a standard BST but then calls the
  * insertFix function to adjust the tree back to an RB tree.
  */
 template<class T>
 void RBT<T>::insert(T val) {
-	RBTNode<T> *newnode = new RBTNode<T>(val, RED, NIL, NIL, NIL);
+	RBTNode<T> *newnode = new RBTNode<T>(val, RRED, NIL, NIL, NIL);
 	RBTNode<T> *y = NIL;
 	RBTNode<T> *x = root;
 
@@ -130,42 +194,42 @@ template<class T>
 void RBT<T>::insertFix(RBTNode<T> *z) {
 	RBTNode<T> *y = NIL;
 
-	while (z->parent->color == RED) {
+	while (z->parent->color == RRED) {
 		if (z->parent == z->parent->parent->left) {
 			y = z->parent->parent->right;
-			if (y->color == RED) {
-				z->parent->color = BLACK;
-				y->color = BLACK;
-				z->parent->parent->color = RED;
+			if (y->color == RRED) {
+				z->parent->color = BBLACK;
+				y->color = BBLACK;
+				z->parent->parent->color = RRED;
 				z = z->parent->parent;
 			} else {
 				if (z == z->parent->right) {
 					z = z->parent;
 					LeftRotation(z);
 				}
-				z->parent->color = BLACK;
-				z->parent->parent->color = RED;
+				z->parent->color = BBLACK;
+				z->parent->parent->color = RRED;
 				RightRotation(z->parent->parent);
 			}
 		} else {
 			y = z->parent->parent->left;
-			if (y->color == RED) {
-				z->parent->color = BLACK;
-				y->color = BLACK;
-				z->parent->parent->color = RED;
+			if (y->color == RRED) {
+				z->parent->color = BBLACK;
+				y->color = BBLACK;
+				z->parent->parent->color = RRED;
 				z = z->parent->parent;
 			} else {
 				if (z == z->parent->left) {
 					z = z->parent;
 					RightRotation(z);
 				}
-				z->parent->color = BLACK;
-				z->parent->parent->color = RED;
+				z->parent->color = BBLACK;
+				z->parent->parent->color = RRED;
 				LeftRotation(z->parent->parent);
 			}
 		}
 	}
-	root->color = BLACK;
+	root->color = BBLACK;
 }
 
 /*
@@ -213,7 +277,7 @@ void RBT<T>::remove(T val) {
 
 	RBTNode<T> *y = z;
 	RBTNode<T> *x = NIL;
-	color_t yorigcol = y->color;
+	ccolor_t yorigcol = y->color;
 
 	if (z->left == NIL) {
 		x = z->right;
@@ -238,7 +302,7 @@ void RBT<T>::remove(T val) {
 		y->color = z->color;
 	}
 	delete z;
-	if (yorigcol == BLACK)
+	if (yorigcol == BBLACK)
 		deleteFix(x);
 }
 
@@ -250,58 +314,58 @@ template<class T>
 void RBT<T>::deleteFix(RBTNode<T> *x) {
 	RBTNode<T> *w = NIL;
 
-	while (x != root && x->color == BLACK) {
+	while (x != root && x->color == BBLACK) {
 		if (x == x->parent->left) {
 			w = x->parent->right;
-			if (w->color == RED) {
-				w->color = BLACK;
-				x->parent->color = RED;
+			if (w->color == RRED) {
+				w->color = BBLACK;
+				x->parent->color = RRED;
 				LeftRotation(x->parent);
 				w = x->parent->right;
 			}
-			if (w->left->color == BLACK && w->right->color == BLACK) {
-				w->color = RED;
+			if (w->left->color == BBLACK && w->right->color == BBLACK) {
+				w->color = RRED;
 				x = x->parent;
 			} else {
-				if (w->right->color == BLACK) {
-					w->left->color = BLACK;
-					w->color = RED;
+				if (w->right->color == BBLACK) {
+					w->left->color = BBLACK;
+					w->color = RRED;
 					RightRotation(w);
 					w = x->parent->right;
 				}
 				w->color = x->parent->color;
-				x->parent->color = BLACK;
-				w->right->color = BLACK;
+				x->parent->color = BBLACK;
+				w->right->color = BBLACK;
 				LeftRotation(x->parent);
 				x = root;
 			}
 		} else {
 			w = x->parent->left;
-			if (w->color == RED) {
-				w->color = BLACK;
-				x->parent->color = RED;
+			if (w->color == RRED) {
+				w->color = BBLACK;
+				x->parent->color = RRED;
 				RightRotation(x->parent);
 				w = x->parent->left;
 			}
-			if (w->left->color == BLACK && w->right->color == BLACK) {
-				w->color = RED;
+			if (w->left->color == BBLACK && w->right->color == BBLACK) {
+				w->color = RRED;
 				x = x->parent;
 			} else {
-				if (w->left->color == BLACK) {
-					w->right->color = BLACK;
-					w->color = RED;
+				if (w->left->color == BBLACK) {
+					w->right->color = BBLACK;
+					w->color = RRED;
 					LeftRotation(w);
 					w = x->parent->left;
 				}
 				w->color = x->parent->color;
-				x->parent->color = BLACK;
-				w->left->color = BLACK;
+				x->parent->color = BBLACK;
+				w->left->color = BBLACK;
 				RightRotation(x->parent);
 				x = root;
 			}
 		}
 	}
-	x->color = BLACK;
+	x->color = BBLACK;
 }
 
 /*
@@ -411,7 +475,7 @@ void RBT<T>::PrintTree(RBTNode<T> *t, int Indent, int Level) {
 	if (t != NIL) {
 		PrintTree(t->right, Indent, Level + 1);
 		string RBstr;
-		if (t->color == RED)
+		if (t->color == RRED)
 			RBstr = "R";
 		else
 			RBstr = "B";
@@ -437,29 +501,20 @@ void RBT<T>::PrintTree(int Indent, int Level) {
 		PrintTree(root, Indent, Level);
 }
 
-/*
- * display the multimap in InOrder
- * parameters: the subtree pointer, the outstream var by reference
- * return the stream
- */
-template<class T, class V>
-string multimap<T, RBT<V>>::InOrderDisplay(RBTreeNode<T, RBT<V>> *nodePtr, string stg, int &count)
-{
-    if(nodePtr != RBTree<T, RBT<V>>::NIL){
-        InOrderDisplay(nodePtr->left, stg, count);
-        stg.to_string(nodePtr->value);
-        if(count!=(size()-1)){
-            stg += '\\';
-            count++;
-        }
-        InOrderDisplay(nodePtr->right, stg, count);
-    }
-    return stg;
-}
-
 template<class T>
 string RBT<T>::toString() {
-
+    string strng = "";
+    string divider = " \\ ";
+    stringstream s;
+    vector<T> vect;
+    InOrderVector(root, vect);
+    for(unsigned int i = 0; i<vect.size(); i++){
+        s>>vect[i];
+        if(i < (vect.size()-1))
+            s>>divider;
+    }
+    strng = s.str();
+    return strng;
 }
 
 #endif /* RBTREE_H_ */
