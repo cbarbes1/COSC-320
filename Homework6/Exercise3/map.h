@@ -9,6 +9,8 @@
 
 #include <iostream>
 #include <vector>
+#include <exception>
+#include <utility>
 #include "RBTree.h"
 
 using namespace std;
@@ -21,20 +23,18 @@ private:
     void copy(RBTreeNode<T, V>*, RBTreeNode<T, V>*&, RBTreeNode<T, V>*, RBTreeNode<T, V> *NilPtr);
 
     // in order recursive functions
-    ostream& InOrderDisplay(RBTreeNode<T, V> *, ostream&);
-    void InOrderVector(RBTreeNode<T, V>*, vector<T, V>&);
-    void InOrderArray(RBTreeNode<T, V>*, T [], int &n, const int);
+    ostream& InOrderDisplay(RBTreeNode<T, V> *, ostream&, int&);
     bool InOrderSubset(RBTreeNode<T, V>*, map<T, V>&);
     bool InOrderSubset(RBTreeNode<T, V>*, RBTreeNode<T, V>*);
-    void InOrderInsert(RBTreeNode<T, V>*, map<T, V> &other);
-    void InOrderErase(RBTreeNode<T, V>*, map<T, V> &other);
+    int InOrderNumPairs(RBTreeNode<T, V> *, int&);
+    
 public:
     map();
     map(const map<T, V>&);
     virtual ~map();
 
     // insert a value into the map
-    void insert(T);
+    void insert(T, V);
     // find a value
     bool find(T);
     //erase a value from the map
@@ -46,8 +46,6 @@ public:
 
     void set(T key, V value);
 
-    // convert the map to a vector
-    void toVector(vector<T, V>&);
     int size(); // return the size
     void clear(); // clear the map
 
@@ -94,7 +92,7 @@ template<class T, class V>
 void map<T, V>::copy(RBTreeNode<T, V> *nodePtr, RBTreeNode<T, V> *&next, RBTreeNode<T, V> *parent, RBTreeNode<T, V> *NilPtr)
 {
     if(nodePtr != NilPtr){
-        next = new RBTreeNode<T, V>(nodePtr->value, nodePtr->color, RBTree<T, V>::NIL, RBTree<T, V>::NIL, parent);
+        next = new RBTreeNode<T, V>(nodePtr->key, nodePtr->value, nodePtr->color, RBTree<T, V>::NIL, RBTree<T, V>::NIL, parent);
         copy(nodePtr->left, next->left, next, NilPtr);
         copy(nodePtr->right, next->right, next, NilPtr);
     }
@@ -106,42 +104,18 @@ void map<T, V>::copy(RBTreeNode<T, V> *nodePtr, RBTreeNode<T, V> *&next, RBTreeN
  * return the stream
  */
 template<class T, class V>
-ostream& map<T, V>::InOrderDisplay(RBTreeNode<T, V> *nodePtr, ostream &strm)
+ostream& map<T, V>::InOrderDisplay(RBTreeNode<T, V> *nodePtr, ostream &strm, int &count)
 {
     if(nodePtr != RBTree<T, V>::NIL){
-        InOrderDisplay(nodePtr->left, strm);
-        strm<<nodePtr->value;
-        InOrderDisplay(nodePtr->right, strm);
+        InOrderDisplay(nodePtr->left, strm, count);
+        strm<<"("<<nodePtr->key<<", "<<nodePtr->value<<")";
+        if(count!=(size()-1)){
+            strm<<", ";
+            count++;
+        }
+        InOrderDisplay(nodePtr->right, strm, count);
     }
     return strm;
-}
-
-/*
- * insert the map into a vector using an in order traversal
- * paremeters: the node of the subtree, the vector
- */
-template<class T, class V>
-void map<T, V>::InOrderVector(RBTreeNode<T, V> *nodePtr, vector<T, V>& vect)
-{
-    if(nodePtr != RBTree<T, V>::NIL){
-        InOrderVector(nodePtr->left, vect);
-        vect.push_back(nodePtr->value);
-        InOrderVector(nodePtr->right, vect);
-    }
-}
-
-/*
- * insert the map into an array using an in order traversal
- * parameters: the node of the subtree, the array, the number of elements that have been inserted, the size of the array
- */
-template<class T, class V>
-void map<T, V>::InOrderArray(RBTreeNode<T, V> *nodePtr, T arr[], int &n, const int size)
-{
-    if(nodePtr != RBTree<T, V>::NIL && n<size){
-        InOrderArray(nodePtr->left, arr, n, size);
-        arr[n++] = nodePtr->value;
-        InOrderArray(nodePtr->right, arr, n, size);
-    }
 }
 
 /*
@@ -155,7 +129,7 @@ bool map<T, V>::InOrderSubset(RBTreeNode<T, V> *nodePtr, map<T, V> &other)
     if(nodePtr != RBTree<T, V>::NIL){
         bool left = InOrderSubset(nodePtr->left, other);
         bool right = InOrderSubset(nodePtr->right, other);
-        return (other.RBTree<T, V>::find(nodePtr->value) && left && right);
+        return (other.RBTree<T, V>::find(nodePtr->key) && left && right);
     }
     return true;
 }
@@ -177,33 +151,20 @@ bool map<T, V>::InOrderSubset(RBTreeNode<T, V> *nodePtr, RBTreeNode<T, V> *nilPt
 }
 
 /*
- * insert the map into a another using an in order traversal
- * parameters: the node and the other map
+ * count number of elements
+ * parameters: the subtree pointer, the count variable
+ * return the count of the map
  */
 template<class T, class V>
-void map<T, V>::InOrderInsert(RBTreeNode<T, V> *nodePtr, map<T, V> &other)
+int map<T, V>::InOrderNumPairs(RBTreeNode<T, V> *nodePtr, int &count)
 {
     if(nodePtr != RBTree<T, V>::NIL){
-        InOrderInsert(nodePtr->left, other);
-        other.insert(nodePtr->value);
-        InOrderInsert(nodePtr->right, other);
+        InOrderNumPairs(nodePtr->left, count);
+        count++;
+        InOrderNumPairs(nodePtr->right, count);
     }
+    return count;
 }
-
-/*
- * insert the map into a vector using an in order traversal
- * parameters: the node of this map and the other map being erased from
- */
-template<class T, class V>
-void map<T, V>::InOrderErase(RBTreeNode<T, V> *nodePtr, map<T, V> &other)
-{
-    if(nodePtr != RBTree<T, V>::NIL){
-        InOrderErase(nodePtr->left, other);
-        other.erase(nodePtr->value);
-        InOrderErase(nodePtr->right, other);
-    }
-}
-
 
 /*
  * overload the assignment operator
@@ -215,6 +176,7 @@ map<T, V> map<T, V>::operator=(const map<T, V>& right)
 {
     clear();
     copy(right.RBTree<T, V>::root, RBTree<T, V>::root, RBTree<T, V>::NIL, right.RBTree<T, V>::NIL);
+    return *this;
 }
 
 /*
@@ -223,10 +185,9 @@ map<T, V> map<T, V>::operator=(const map<T, V>& right)
 template<class T, class V>
 int map<T, V>::size()
 {
-    vector<T, V> vect;
-    toVector(vect);
-
-    int size = vect.size();
+    int size = 0;
+    
+    InOrderNumPairs(RBTree<T, V>::root, size);
 
     return size;
 }
@@ -247,17 +208,17 @@ void map<T, V>::clear()
  * Parameters: item to be added
 */
 template<class T, class V>
-void map<T, V>::insert(T val)
+void map<T, V>::insert(T key, V val)
 {
-    RBTreeNode<T, V> *newnode = new RBTreeNode<T, V>(val, RED, RBTree<T, V>::NIL, RBTree<T, V>::NIL, RBTree<T, V>::NIL);
+    RBTreeNode<T, V> *newnode = new RBTreeNode<T, V>(key, val, RED, RBTree<T, V>::NIL, RBTree<T, V>::NIL, RBTree<T, V>::NIL);
 	RBTreeNode<T, V> *y = RBTree<T, V>::NIL;
 	RBTreeNode<T, V> *x = RBTree<T, V>::root;
 
 	while (x != RBTree<T, V>::NIL) {
 		y = x;
-		if (val < x->value)
+		if (key < x->key)
 			x = x->left;
-		else if(val > x->value)
+		else if(key > x->key)
 			x = x->right;
         else{
             delete newnode;
@@ -268,9 +229,9 @@ void map<T, V>::insert(T val)
     newnode->parent = y;
     if (y == RBTree<T, V>::NIL)
         RBTree<T, V>::root = newnode;
-    else if (newnode->value < y->value)
+    else if (newnode->key < y->key)
         y->left = newnode;
-    else if(newnode->value > y->value)
+    else if(newnode->key > y->key)
         y->right = newnode;
 
     //  Adjust the RB tree to retain the properties.
@@ -284,9 +245,9 @@ void map<T, V>::insert(T val)
  * Find a value in the map
  */
 template<class T, class V>
-bool map<T, V>::find(T item)
+bool map<T, V>::find(T key)
 {
-    return RBTree<T, V>::find(item);
+    return RBTree<T, V>::find(key);
 }
 
 
@@ -294,9 +255,9 @@ bool map<T, V>::find(T item)
  * Erase a value from the tree
  */
 template<class T, class V>
-void map<T, V>::erase(T val)
+void map<T, V>::erase(T key)
 {
-    RBTreeNode<T, V> *z = RBTree<T, V>::findNode(val);
+    RBTreeNode<T, V> *z = RBTree<T, V>::findNode(key);
 	if (z == RBTree<T, V>::NIL)
 		return;
 
@@ -346,6 +307,8 @@ bool map<T, V>::empty()
 template<class T, class V>
 V map<T, V>::get(T key)
 {
+    if(!find(key))
+        throw std::runtime_error("Pair not in the set");
     return RBTree<T, V>::findNode(key)->value;
 }
 
@@ -353,13 +316,6 @@ template<class T, class V>
 void map<T, V>::set(T key, V value)
 {
     insert(key, value);
-}
-
-// convert the map to a vector
-template<class T, class V>
-void map<T, V>::toVector(vector<T, V>& vect)
-{
-    InOrderVector(RBTree<T, V>::root, vect);
 }
 
 // overload the == operator
@@ -376,74 +332,13 @@ bool map<T, V>::operator!=(map<T, V>& right)
     return !(InOrderSubset(RBTree<T, V>::root, right) && InOrderSubset(right.RBTree<T, V>::root, right.RBTree<T, V>::NIL));
 }
 
-// overload the < operator
-template<class T, class V>
-bool map<T, V>::operator<(map<T, V>& right)
-{
-    return InOrderSubset(RBTree<T, V>::root, right) && !(InOrderSubset(right.RBTree<T, V>::root, right.RBTree<T, V>::NIL));
-}
-
-// overload the > operator
-template<class T, class V>
-bool map<T, V>::operator>(map<T, V>& right)
-{
-    return InOrderSubset(right.RBTree<T, V>::root, right.RBTree<T, V>::NIL) && !(InOrderSubset(RBTree<T, V>::root, right));
-}
-
-// overload the <= operator
-template<class T, class V>
-bool map<T, V>::operator<=(map<T, V>& right)
-{
-    return InOrderSubset(RBTree<T, V>::root, right);
-}
-
-// overload the >= operator
-template<class T, class V>
-bool map<T, V>::operator>=(map<T, V>& right)
-{
-    return InOrderSubset(right.RBTree<T, V>::root, right.RBTree<T, V>::NIL);
-}
-
-// overload the + operator
-template<class T, class V>
-map<T, V> map<T, V>::operator+(map<T, V> right)
-{
-    map<T, V> temp(*this);
-    right.InOrderInsert(right.RBTree<T, V>::root, temp);
-    return temp;
-}
-
-// overload the - operator
-template<class T, class V>
-map<T, V> map<T, V>::operator-(map<T, V> right)
-{
-    map<T, V> temp(*this);
-
-    right.InOrderErase(right.RBTree<T, V>::root, temp);
-
-    return temp;
-}
-
-// overload the * operator
-template<class T, class V>
-map<T, V> map<T, V>::operator*(map<T, V> right)
-{
-    map<T, V> temp((*this + right) - ((*this - right)+(right - *this)));
-    return temp;
-}
-
 // overload the << operator
 template<class T, class V>
 ostream& operator<<(ostream& os, map<T, V>& obj)
 {
     os<<"{ ";
-    vector<T, V> vect;
-    obj.toVector(vect);
-    for(unsigned int i = 0; i<vect.size(); i++){
-        os<<vect[i];
-        if(i != (vect.size() - 1))
-            os<<", ";
-    }
+    int count = 0;
+    obj.InOrderDisplay(obj.RBTree<T, V>::root, os, count);
     os<<" }\n";
     return os;
 }
