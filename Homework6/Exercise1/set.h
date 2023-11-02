@@ -21,13 +21,14 @@ private:
     void copy(RBTreeNode<T>*, RBTreeNode<T>*&, RBTreeNode<T>*, RBTreeNode<T> *NilPtr);
 
     // in order recursive functions
-    ostream& InOrderDisplay(RBTreeNode<T> *, ostream&);
+    ostream& InOrderDisplay(RBTreeNode<T> *, ostream&, int&);
     void InOrderVector(RBTreeNode<T>*, vector<T>&);
     void InOrderArray(RBTreeNode<T>*, T [], int &n, const int);
     bool InOrderSubset(RBTreeNode<T>*, set<T>&);
     bool InOrderSubset(RBTreeNode<T>*, RBTreeNode<T>*);
     void InOrderInsert(RBTreeNode<T>*, set<T> &other);
     void InOrderErase(RBTreeNode<T>*, set<T> &other);
+    int InOrderNumElems(RBTreeNode<T> *, int&);
 public:
     set();
     set(const set<T>&);
@@ -87,6 +88,7 @@ set<T>::~set()
 template<class T>
 set<T>::set(const set<T> &right)
 {
+    // call copy recursive function
     copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
 }
 
@@ -97,6 +99,7 @@ set<T>::set(const set<T> &right)
 template<class T>
 void set<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<T> *parent, RBTreeNode<T> *NilPtr)
 {
+    // if the nil is encountered stop the copy process
     if(nodePtr != NilPtr){
         next = new RBTreeNode<T>(nodePtr->value, nodePtr->color, RBTree<T>::NIL, RBTree<T>::NIL, parent);
         copy(nodePtr->left, next->left, next, NilPtr);
@@ -110,12 +113,18 @@ void set<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<T> *p
  * return the stream
  */
 template<class T>
-ostream& set<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm)
+ostream& set<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm, int &count)
 {
+    // if nil end the print process
+    // call left and right display
     if(nodePtr != RBTree<T>::NIL){
-        InOrderDisplay(nodePtr->left, strm);
+        InOrderDisplay(nodePtr->left, strm, count);
         strm<<nodePtr->value;
-        InOrderDisplay(nodePtr->right, strm);
+        if(count!=(size()-1)){ // if the end is reached then dont print the last ,
+            strm<<", ";
+            count++;
+        }
+        InOrderDisplay(nodePtr->right, strm, count);
     }
     return strm;
 }
@@ -127,6 +136,7 @@ ostream& set<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm)
 template<class T>
 void set<T>::InOrderVector(RBTreeNode<T> *nodePtr, vector<T>& vect)
 {
+    // if nil is encountered then stop
     if(nodePtr != RBTree<T>::NIL){
         InOrderVector(nodePtr->left, vect);
         vect.push_back(nodePtr->value);
@@ -208,6 +218,17 @@ void set<T>::InOrderErase(RBTreeNode<T> *nodePtr, set<T> &other)
     }
 }
 
+template<class T>
+int set<T>::InOrderNumElems(RBTreeNode<T> *nodePtr, int &count)
+{
+    if(nodePtr != RBTree<T>::NIL){
+        InOrderNumElems(nodePtr->left, count);
+        count++;
+        InOrderNumElems(nodePtr->right, count);
+    }
+    return count;
+}
+
 
 /*
  * overload the assignment operator
@@ -219,6 +240,7 @@ set<T> set<T>::operator=(const set<T>& right)
 {
     clear();
     copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
+    return *this;
 }
 
 /*
@@ -227,11 +249,10 @@ set<T> set<T>::operator=(const set<T>& right)
 template<class T>
 int set<T>::size()
 {
-    vector<T> V;
-    toVector(V);
-    
-    int size = V.size();
-    
+    int size = 0;
+
+    InOrderNumElems(RBTree<T>::root, size);
+
     return size;
 }
 
@@ -242,7 +263,6 @@ template<class T>
 void set<T>::clear()
 {
     RBTree<T>::destroySubTree(RBTree<T>::root);
-    delete RBTree<T>::NIL;
 }
 
 
@@ -263,7 +283,7 @@ void set<T>::insert(T val)
 			x = x->left;
 		else if(val > x->value)
 			x = x->right;
-        else{
+        else{ // if equal stop the loop and exit, logic here may be fixed however this will work for now
             delete newnode;
             return;
         }
@@ -437,13 +457,9 @@ template<class T>
 ostream& operator<<(ostream& os, set<T>& obj)
 {
     os<<"{ ";
-    vector<T> vect;
-    obj.toVector(vect);
-    for(unsigned int i = 0; i<vect.size(); i++){
-        os<<vect[i];
-        if(i != (vect.size() - 1))
-            os<<", ";
-    }
+    int count = 0;
+    // call in order display with the count var
+    obj.InOrderDisplay(obj.RBTree<T>::root, os, count);
     os<<" }\n";
     return os;
 }

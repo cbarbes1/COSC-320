@@ -1,12 +1,11 @@
 /******************************************************************************************************
  * Authors: Cole Barbes and Harrison Colborne
  * Creation Date: 10/18/23
- * Last Edited: 10/18/23
-
- * Description: implementation of a multiset class similar to the stl multiset 
+ * Last Edited: 10/31/23
+ * Description: implementation of a multiset class similar to the stl multiset
 ******************************************************************************************************/
-#ifndef MULTISET_H
-#define MULTISET_H
+#ifndef SET_H
+#define SET_H
 
 #include <iostream>
 #include <vector>
@@ -18,23 +17,27 @@ using namespace std;
 template<class T>
 class multiset : public RBTree<T>{
 private:
+    // below are all recursive private functions for use by the other functions
     void copy(RBTreeNode<T>*, RBTreeNode<T>*&, RBTreeNode<T>*, RBTreeNode<T> *NilPtr);
-    ostream& InOrderDisplay(RBTreeNode<T> *, ostream&);
+
+    // in order recursive functions
+    ostream& InOrderDisplay(RBTreeNode<T> *, ostream&, int&);
     void InOrderVector(RBTreeNode<T>*, vector<T>&);
     void InOrderArray(RBTreeNode<T>*, T [], int &n, const int);
-
     bool InOrderSubset(RBTreeNode<T>*, multiset<T>&);
     bool InOrderSubset(RBTreeNode<T>*, RBTreeNode<T>*);
-    
-    void InOrdercount(RBTreeNode<T>*, T, int &);
+    void InOrderInsert(RBTreeNode<T>*, multiset<T> &other);
+    void InOrderErase(RBTreeNode<T>*, multiset<T> &other);
+    int InOrderNumElems(RBTreeNode<T> *, int&);
+    int InOrderNumElemsType(RBTreeNode<T> *, int&, T);
 public:
     multiset();
     multiset(const multiset<T>&);
-    ~multiset();
-    
+    virtual ~multiset();
+
     // insert a value into the multiset
     void insert(T);
-    // find a value 
+    // find a value
     bool find(T);
     //erase a value from the multiset
     void erase(T);
@@ -44,58 +47,61 @@ public:
     void toVector(vector<T>&);
     // convert the multiset to an array
     void toArray(T arr[], const int size);
-    
-    int size();
-    
-    void clear();
-    
+    int size(); // return the size
     int count(T);
+    void clear(); // clear the multiset
 
     // overloaded assignment operator
     multiset<T> operator=(const multiset<T>& right);
-
+    // overloaded operators
     bool operator==(multiset<T>& right);
-
     bool operator!=(multiset<T>& right);
-
     bool operator<(multiset<T>& right);
-
     bool operator>(multiset<T>& right);
-
     bool operator<=(multiset<T>& right);
-
     bool operator>=(multiset<T>& right);
-
-    multiset<T> operator+(multiset<T>& right);
-
-    multiset<T> operator-(multiset<T>& right);
-    
-    multiset<T> operator*(multiset<T>& right);
-
+    multiset<T> operator+(multiset<T> right);
+    multiset<T> operator-(multiset<T> right);
+    multiset<T> operator*(multiset<T> right);
     template<class c>
     friend ostream& operator<<(ostream& os, multiset<c>& obj);
-    
-    
 };
-    
+
+/*
+ * empty constructor
+ */
 template<class T>
 multiset<T>::multiset()
 {
 }
 
+/*
+ * destructor which has no purpose
+ */
 template<class T>
 multiset<T>::~multiset()
 {
-    clear();
 }
 
+/*
+ * copy constructor for the multiset
+ * parameters: the right multiset
+ */
+template<class T>
+multiset<T>::multiset(const multiset<T> &right)
+{
+    // call copy recursive function
+    copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
+}
 
 /*
  * copy each node recursively in a sub tree pointed to by nodePtr
+ * parameters: the node of the other subtree, the next node of the next subtree, the parent of this subtree, the nil of the other tree
  */
 template<class T>
 void multiset<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<T> *parent, RBTreeNode<T> *NilPtr)
 {
+    // if the nil is encountered stop the copy process
     if(nodePtr != NilPtr){
         next = new RBTreeNode<T>(nodePtr->value, nodePtr->color, RBTree<T>::NIL, RBTree<T>::NIL, parent);
         copy(nodePtr->left, next->left, next, NilPtr);
@@ -103,20 +109,36 @@ void multiset<T>::copy(RBTreeNode<T> *nodePtr, RBTreeNode<T> *&next, RBTreeNode<
     }
 }
 
+/*
+ * display the multiset in InOrder
+ * parameters: the subtree pointer, the outstream var by reference
+ * return the stream
+ */
 template<class T>
-ostream& multiset<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm)
+ostream& multiset<T>::InOrderDisplay(RBTreeNode<T> *nodePtr, ostream &strm, int &count)
 {
+    // if nil end the print process
+    // call left and right display
     if(nodePtr != RBTree<T>::NIL){
-        InOrderDisplay(nodePtr->left, strm);
+        InOrderDisplay(nodePtr->left, strm, count);
         strm<<nodePtr->value;
-        InOrderDisplay(nodePtr->right, strm);
+        if(count!=(size()-1)){ // if the end is reached then dont print the last ,
+            strm<<", ";
+            count++;
+        }
+        InOrderDisplay(nodePtr->right, strm, count);
     }
     return strm;
 }
 
+/*
+ * insert the multiset into a vector using an in order traversal
+ * paremeters: the node of the subtree, the vector
+ */
 template<class T>
 void multiset<T>::InOrderVector(RBTreeNode<T> *nodePtr, vector<T>& vect)
 {
+    // if nil is encountered then stop
     if(nodePtr != RBTree<T>::NIL){
         InOrderVector(nodePtr->left, vect);
         vect.push_back(nodePtr->value);
@@ -124,6 +146,10 @@ void multiset<T>::InOrderVector(RBTreeNode<T> *nodePtr, vector<T>& vect)
     }
 }
 
+/*
+ * insert the multiset into an array using an in order traversal
+ * parameters: the node of the subtree, the array, the number of elements that have been inserted, the size of the array
+ */
 template<class T>
 void multiset<T>::InOrderArray(RBTreeNode<T> *nodePtr, T arr[], int &n, const int size)
 {
@@ -134,6 +160,11 @@ void multiset<T>::InOrderArray(RBTreeNode<T> *nodePtr, T arr[], int &n, const in
     }
 }
 
+/*
+ * check if A is a submultiset of B
+ * parameters: node of the subtree, the other multiset which is being compared to
+ * return whether this is a subset of the other
+ */
 template<class T>
 bool multiset<T>::InOrderSubset(RBTreeNode<T> *nodePtr, multiset<T> &other)
 {
@@ -145,6 +176,11 @@ bool multiset<T>::InOrderSubset(RBTreeNode<T> *nodePtr, multiset<T> &other)
     return true;
 }
 
+/*
+ * check if A is a subset of B
+ * parameters: the pointer to the other multiset node, and the nil of that multiset
+ * return whether this A is a subset of B
+ */
 template<class T>
 bool multiset<T>::InOrderSubset(RBTreeNode<T> *nodePtr, RBTreeNode<T> *nilPtr)
 {
@@ -156,72 +192,112 @@ bool multiset<T>::InOrderSubset(RBTreeNode<T> *nodePtr, RBTreeNode<T> *nilPtr)
     return true;
 }
 
+/*
+ * insert the multiset into a another using an in order traversal
+ * parameters: the node and the other multiset
+ */
 template<class T>
-void multiset<T>::InOrdercount(RBTreeNode<T> *nodePtr, T val, int &count)
+void multiset<T>::InOrderInsert(RBTreeNode<T> *nodePtr, multiset<T> &other)
+{
+    if(nodePtr != RBTree<T>::NIL && other.count(nodePtr->value) != count(nodePtr->value)){
+        InOrderInsert(nodePtr->left, other);
+        if(other.count(nodePtr->value) < count(nodePtr->value))
+            other.insert(nodePtr->value);
+        InOrderInsert(nodePtr->right, other);
+    }
+}
+
+/*
+ * insert the multiset into a vector using an in order traversal
+ * parameters: the node of this multiset and the other multiset being erased from
+ */
+template<class T>
+void multiset<T>::InOrderErase(RBTreeNode<T> *nodePtr, multiset<T> &other)
 {
     if(nodePtr != RBTree<T>::NIL){
-        InOrdercount(nodePtr->left, val, count);
-        if(nodePtr->value == val)
-            count++;
-        InOrdercount(nodePtr->right, val, count);
+        InOrderErase(nodePtr->left, other);
+        other.erase(nodePtr->value);
+        InOrderErase(nodePtr->right, other);
     }
+}
+
+template<class T>
+int multiset<T>::InOrderNumElems(RBTreeNode<T> *nodePtr, int &count)
+{
+    if(nodePtr != RBTree<T>::NIL){
+        InOrderNumElems(nodePtr->left, count);
+        count++;
+        InOrderNumElems(nodePtr->right, count);
+    }
+    return count;
+}
+
+template<class T>
+int multiset<T>::InOrderNumElemsType(RBTreeNode<T> *nodePtr, int &count, T val)
+{
+    if(nodePtr != RBTree<T>::NIL){
+        InOrderNumElemsType(nodePtr->left, count, val);
+        if(val == nodePtr->value)
+            count++;
+        InOrderNumElemsType(nodePtr->right, count, val);
+    }
+    return count;
 }
 
 
 /*
  * overload the assignment operator
+ * parameters: the right multiset
+ * return the multiset
  */
 template<class T>
 multiset<T> multiset<T>::operator=(const multiset<T>& right)
 {
-    RBTree<T>::destroySubTree(RBTree<T>::root);
+    clear();
     copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
+    return *this;
 }
 
+/*
+ * return the size of the multiset
+ */
 template<class T>
 int multiset<T>::size()
 {
-    vector<T> V;
-    toVector(V);
-    
-    int size = V.size();
-    
+    int size = 0;
+
+    InOrderNumElems(RBTree<T>::root, size);
+
     return size;
 }
 
-template<class T>
-void multiset<T>::clear()
-{
-    vector<T> V;
-    toVector(V);
-    
-    for(unsigned int i = 0; i<V.size(); i++)
-        erase(V[i]);
-}
-
+/*
+ * return the frequency of a particular number
+ */
 template<class T>
 int multiset<T>::count(T val)
 {
-    if(RBTree<T>::root == RBTree<T>::NIL)
-        return 0;
     int count = 0;
-    InOrdercount(RBTree<T>::root, val, count);
+
+    InOrderNumElemsType(RBTree<T>::root, count, val);
+
     return count;
 }
 
-
-
+/*
+ * clear the multiset
+ */
 template<class T>
-multiset<T>::multiset(const multiset<T> &right)
+void multiset<T>::clear()
 {
-    copy(right.RBTree<T>::root, RBTree<T>::root, RBTree<T>::NIL, right.RBTree<T>::NIL);
+    RBTree<T>::destroySubTree(RBTree<T>::root);
 }
 
 
 /*
  * Description: Insert function which calls the addElement function and only adds a non copy function
  * Parameters: item to be added
- */
+*/
 template<class T>
 void multiset<T>::insert(T val)
 {
@@ -237,18 +313,19 @@ void multiset<T>::insert(T val)
 			x = x->right;
 	}
 
-	newnode->parent = y;
-	if (y == RBTree<T>::NIL)
-		RBTree<T>::root = newnode;
-	else if (newnode->value < y->value)
-		y->left = newnode;
-	else if(newnode->value >= y->value)
-		y->right = newnode;
+    newnode->parent = y;
+    if (y == RBTree<T>::NIL)
+        RBTree<T>::root = newnode;
+    else if (newnode->value < y->value)
+        y->left = newnode;
+    else if(newnode->value >= y->value)
+        y->right = newnode;
 
-	//  Adjust the RB tree to retain the properties.
+    //  Adjust the RB tree to retain the properties.
     // if the value is not in the tree insert it
     RBTree<T>::insertFix(newnode);
 }
+
 
 
 /*
@@ -329,117 +406,88 @@ void multiset<T>::toArray(T arr[], const int size)
     InOrderArray(RBTree<T>::root, arr, n,  size);
 }
 
+// overload the == operator
 template<class T>
 bool multiset<T>::operator==(multiset<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right) && InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL);
 }
 
+// overload the != operator
 template<class T>
 bool multiset<T>::operator!=(multiset<T>& right)
 {
-    return !(InOrderSubmultiset(RBTree<T>::root, right) && InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL));
+    return !(InOrderSubset(RBTree<T>::root, right) && InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL));
 }
 
+// overload the < operator
 template<class T>
 bool multiset<T>::operator<(multiset<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right) && !(InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL));
 }
 
+// overload the > operator
 template<class T>
 bool multiset<T>::operator>(multiset<T>& right)
 {
     return InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL) && !(InOrderSubset(RBTree<T>::root, right));
 }
 
+// overload the <= operator
 template<class T>
 bool multiset<T>::operator<=(multiset<T>& right)
 {
     return InOrderSubset(RBTree<T>::root, right);
 }
 
+// overload the >= operator
 template<class T>
 bool multiset<T>::operator>=(multiset<T>& right)
 {
     return InOrderSubset(right.RBTree<T>::root, right.RBTree<T>::NIL);
 }
 
-
+// overload the + operator
 template<class T>
-multiset<T> multiset<T>::operator+(multiset<T>& right)
+multiset<T> multiset<T>::operator+(multiset<T> right)
 {
-    vector<T> vect1;
-    toVector(vect1);
-    vector<T> vect2;
-    right.toVector(vect2);
-    multiset<T> temp;
-
-    for(int i = 0; i<vect1.size(); i++){
-        int freq1 = count(vect1[i]);
-        int freq2 = right.count(vect1[i]);
-        if(freq1 >= freq2){
-            temp.insert(vect1[i]);
-        }
-    }
-
-
-    for(int i = 0; i<vect2.size(); i++){
-        int freq1 = count(vect2[i]);
-        int freq2 = right.count(vect2[i]);
-        if(freq1 < freq2){
-            temp.insert(vect2[i]);
-        }
-    }
+    multiset<T> temp(*this);
+    right.InOrderInsert(right.RBTree<T>::root, temp);
     return temp;
 }
 
+// overload the - operator
 template<class T>
-multiset<T> multiset<T>::operator-(multiset<T>& right)
+multiset<T> multiset<T>::operator-(multiset<T> right)
 {
-    vector<T> vect1;
-    toVector(vect1);
-    vector<T> vect2;
-    right.toVector(vect2);
-    multiset<T> temp;
-    for(unsigned int i = 0; i<vect1.size(); i++)
-        temp.insert(vect1[i]);
-        
-    for(unsigned int i = 0; i<vect2.size(); i++)
-            temp.erase(vect2[i]);
-        
+    multiset<T> temp(*this);
+
+    right.InOrderErase(right.RBTree<T>::root, temp);
+
     return temp;
 }
 
+// overload the * operator
 template<class T>
-multiset<T> multiset<T>::operator*(multiset<T>& right)
+multiset<T> multiset<T>::operator*(multiset<T> right)
 {
-    multiset<T> temp;
-    vector<T> vect;
-    toVector(vect);
-    
-    for(unsigned int i = 0; i<vect.size(); i++){
-        if(right.find(vect[i]) && count(vect[i]) > right.count(vect[i]))
-            temp.insert(vect[i]);
-    }
-    
+    multiset<T> temp((*this + right) - ((*this - right)+(right - *this)));
     return temp;
 }
 
+// overload the << operator
 template<class T>
 ostream& operator<<(ostream& os, multiset<T>& obj)
 {
     os<<"{ ";
-    vector<T> vect;
-    obj.toVector(vect);
-    for(unsigned int i = 0; i<vect.size(); i++){
-        os<<vect[i];
-        if(i != (vect.size() - 1))
-            os<<", ";
-    }
+    int count = 0;
+    // call in order display with the count var
+    obj.InOrderDisplay(obj.RBTree<T>::root, os, count);
     os<<" }\n";
     return os;
 }
 
-#endif // end of the declaration and implementation of multiset class
+
+#endif // end of the declaration and implementation of multimultiset class
     

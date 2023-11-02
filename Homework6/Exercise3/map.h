@@ -199,7 +199,6 @@ template<class T, class V>
 void map<T, V>::clear()
 {
     RBTree<T, V>::destroySubTree(RBTree<T, V>::root);
-    delete RBTree<T, V>::NIL;
 }
 
 
