@@ -7,6 +7,7 @@
 #include <iostream>
 #include <ctime>
 #include <vector>
+#include <exception>
 
 #include "map.h"
 
@@ -37,31 +38,54 @@ int main()
 
     }
 
+    // print the map
     cout<<tester<<endl;
 
+    // copy constructor test
     map<int, string> newTester = tester;
 
+    // create empty map
     map<int, string> newGuy;
 
+    // test the equals operator
     newGuy = tester;
 
+    // test the copy constructed map with a print
     cout<<"Copy constructed map: "<<newTester<<endl;
 
+    // test if the map is empty
     if(newGuy.empty()){
         cout<<"The map is empty"<<endl;
     }
 
+    // print the equals operator test
     cout<<"Equal operator map: "<<newGuy<<endl;
 
+    // test if the map is not empty
     if(!tester.empty()){
         cout<<"The map is not empty"<<endl;
     }
 
+    // get test key form user
     int tmp = 0;
     cout<<"enter a key in the map"<<endl;
     cin>>tmp;
 
-    cout<<newGuy.get(tmp)<<endl;
+    // try to get the value at the specified key
+    try{
+        cout<<newGuy.get(tmp)<<endl;
+    }catch(exception &e){
+        cout<<e.what()<<endl;
+    }
+
+    if(tester == newGuy)
+        cout<<"equal"<<endl;
+
+    cout<<"Enter a key to remove from the map:";
+    cin>>tmp;
+
+    tester.erase(tmp);
+    cout<<tester<<endl;
     
     return 0;
 }

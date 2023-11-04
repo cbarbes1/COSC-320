@@ -1,7 +1,7 @@
 /******************************************************************************************************
- * Authors: Cole Barbes and Harrison Colborne
+ * Authors: Cole Barbes
  * Creation Date: 10/18/23
- * Last Edited: 10/31/23
+ * Last Edited: 11/2/23
  * Description: implementation of a multiset class similar to the stl multiset
 ******************************************************************************************************/
 #ifndef SET_H

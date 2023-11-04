@@ -7,7 +7,7 @@ OBJS = main.o
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-main.o : main.cpp RBTree.h RBT.h multimap.h
+main.o : main.cpp RBTree.h multimap.h
 	$(CC) $(CPPFLAGS) -c main.cpp
 
 clean:

@@ -1,3 +1,8 @@
+/*
+ * code taken from COSC 320 example code, Prof. Dr. Spickler
+ * date edited: 11/2/23
+ * changes: changed the type from just one type to 2
+ */
 #ifndef RBTREE_H_
 #define RBTREE_H_
 
@@ -54,8 +59,11 @@ protected:
 
 	void destroySubTree(RBTreeNode<T, V>*);
 
+
+
 public:
 	RBTree();
+
 	virtual ~RBTree();
 
 	virtual void insert(T, V);
@@ -72,6 +80,7 @@ RBTree<T, V>::RBTree() {
 	NIL = new RBTreeNode<T, V>(T(), V(), BLACK, nullptr, nullptr, nullptr);
 	root = NIL;
 }
+
 
 template<class T, class V>
 RBTree<T, V>::~RBTree() {

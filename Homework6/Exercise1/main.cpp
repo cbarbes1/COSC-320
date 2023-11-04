@@ -78,6 +78,9 @@ int main()
     }
     cout<<endl;
 
+    cout<<"Set 1 after delete: "<<dataSet1<<endl;
+    cout<<"Set 2: "<<dataSet2<<endl;
+
 //  get the union of the 2 sets
     set<int> hello = dataSet1 + dataSet2;
     cout<<hello<<endl;
@@ -103,7 +106,7 @@ int main()
     cout<<intersection<<endl;
     
     // get the size of the set
-    cout<<dataSet1.size()<<endl;
+    cout<<"Size of data set 1: "<<dataSet1.size()<<endl;
 
     // test the equals operator
     set<int> equalTester;

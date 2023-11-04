@@ -1,7 +1,7 @@
 /*
- * Author: Cole Barbes
+ * Author: Cole Barbes and Harrison Colborne
  * Creation date: 10/18/23
- * Last Edited: 10/18/23
+ * Last Edited: 11/2/23
  * Desciption: utilizes the multiset class and the functions created in Lab07
  */
 #include <iostream>
@@ -95,7 +95,7 @@ int main()
         cout<<"First is equal to itself"<<endl;
 
     // get the difference of A - B
-    multiset<int> difference = dataSet2-dataSet1;
+    multiset<int> difference = dataSet1-dataSet2;
     cout<<difference<<endl;
 
     // get the multiset of same elements between multisets

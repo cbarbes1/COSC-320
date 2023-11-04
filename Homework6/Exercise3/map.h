@@ -145,7 +145,7 @@ bool map<T, V>::InOrderSubset(RBTreeNode<T, V> *nodePtr, RBTreeNode<T, V> *nilPt
     if(nodePtr != nilPtr){
         bool left = InOrderSubset(nodePtr->left, nilPtr);
         bool right = InOrderSubset(nodePtr->right, nilPtr);
-        return (RBTree<T, V>::find(nodePtr->value) && left && right);
+        return (RBTree<T, V>::find(nodePtr->key) && left && right);
     }
     return true;
 }
@@ -308,6 +308,7 @@ V map<T, V>::get(T key)
 {
     if(!find(key))
         throw std::runtime_error("Pair not in the set");
+
     return RBTree<T, V>::findNode(key)->value;
 }
 
