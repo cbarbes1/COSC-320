@@ -138,8 +138,7 @@ int main()
                 // calculate the fitness measure of the possible key
                 previousMeasure = fitMeasure;
                 fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
-                if(fitMeasure > previousMeasure){ // if the fitness increases then keep the key
-                    cout<<"success in transpose"<<endl;
+                if(fitMeasure != previousMeasure){ // if the fitness increases then keep the key
                     key = testVector;
                 }else{ // if not set the text back to original and continue
                     cipherText = previousText;
