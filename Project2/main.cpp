@@ -5,28 +5,32 @@
 #include "tinyfiledialogs.h"
 #include <algorithm>
 #include <cmath>
+#include <string>
 
 using namespace std;
 
 const string Replacer = "ETAOINSHRDLCUMWFGYPBVKJQXZ";
 
 void incrementFrequency(char&, int&);
-void freqAnalysis(ifstream&, map<string, int>&, int n);
+void freqAnalysis(string, vector<pair<char, int>>&);
 void replaceByFreq(vector<pair<char, int>>, vector<char>&);
-
-double fitMeasureCalc(vector<pair<string, int>>);
-
-bool comparator(pair<char, int> left, pair<char, int> right){
-    return left.second > right.second;
-}
+double fitMeasureCalc(string, map<string, double>&, int n);
+void decryptCipherString(string, vector<char>);
 
 int main()
 {
-    map<string, int> NGramMap;
+    map<string, double> NGramMap;
     map<char, int> FreqMap;
     vector<char> key;
     vector<pair<char, int>> Freqs;
     double fitMeasure = 0;
+    int ngram = 3;
+    string cipherText = "";
+    
+    for(int i = 0; i<26; i++){
+        Freqs[i].first = ('A' + i);
+        Freqs[i].second = 0;
+    }
 
     // get a file to use in n gram key calculation
     char const *lFilterPatterns[2] = { "*.txt", "*"};
@@ -35,19 +39,20 @@ int main()
     ifstream InFile1(filename1);// open the file for input
 
     if(InFile1){
+        string word = "";
         // load the information into the map then proceed
         while(InFile1){
-            string word = "";
-            int freq = 0;
+            double freq = 0;
             InFile1>>word>>freq;
             InFile1.ignore(256, '\n');
 
             NGramMap.set(word, freq);
         }
-
+        ngram = word.size();
     }else{
         cerr<<"N-Gram file is needed to proceed, exiting\n";
     }
+    cout<<"N-Gram File Loaded"<<endl;
 
     // get a file for the Cyphertext
     char const *filename2 = tinyfd_openFileDialog("Open Ciphertext File", NULL, 1, lFilterPatterns, "CipherText File", 0);
@@ -55,26 +60,24 @@ int main()
     ifstream InFile2(filename2);// open the file for input
     if(InFile2){
         // load the information into the map then proceed
-        freqAnalysis(InFile2, FreqMap);
+        char buf;
+        while(InFile2>>buf){
+            if(buf != '\n')
+                cipherText += buf;
+        }
+        freqAnalysis(cipherText, Freqs);
     }else{
-        cerr<<"N-Gram file is needed to proceed, exiting"<<endl;
+        cerr<<"cipher text file is needed to proceed, exiting"<<endl;
     }
+    cout<<"Cipher Text File Loaded"<<endl;
 
-    cout<<FreqMap<<endl;
-    for(unsigned int i = 0; i<26; i++){
-        key.push_back(('A'+i));
-    }
-    FreqMap.toVector(Freqs);
+    for(int i = 0; i<26; i++)
+        key[i] = ('A'+i);
+    
+    //replaceByFreq(Freqs, key);
 
-    replaceByFreq(Freqs, key);
-
-    /*
-    for(unsigned int i = 0; i<key.size(); i++)
-        cout<<static_cast<char>('A'+i)<<" "<<key[i]<<endl;
-    */
-
-    fitMeasure = fitMeasureCalc(Freqs);
-    cout<<fitMeasure<<endl;
+    //fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
+    //cout<<fitMeasure<<endl;
 
     InFile1.close();
     InFile2.close();
@@ -87,23 +90,12 @@ void incrementFrequency(string &key, int &freq)
     freq++;
 }
 
-void freqAnalysis(ifstream &infile, map<string, int> &output, int n)
+void freqAnalysis(string cipher, vector<pair<char, int>> &output)
 {
     if(infile){
         char temp;
-        string word = "";
-        int i = 0;
         while(infile>>temp){
-            i++;
-            word += temp;
-            if(i!=n){
-                continue;
-            }else{
-                if(!output.InOrderAct(temp, incrementFrequency)){
-                    output.set(word, 1);
-                }
-                i=0;
-            }
+            output[(temp - 'A')].second++;
         }
         infile.seekg(0, std::ios::beg);
     }else{
@@ -111,22 +103,31 @@ void freqAnalysis(ifstream &infile, map<string, int> &output, int n)
     }
 }
 
-void replaceByFreq(vector<pair<string, int>> Freq, vector<string> &key)
+void replaceByFreq(vector<pair<char, int>> Freq, vector<char> &key)
 {
-    sort(Freq.begin(), Freq.end(), comparator);
-
     int spos = 0;
     for(unsigned int i = 0; i<Freq.size(); i++){
-        int pos = (Freq[i].first[0] - 'A');
+        int pos = (Freq[i].first - 'A');
         key[pos] = Replacer[spos++];
     }
 }
 
-double fitMeasureCalc(vector<pair<string, int>> freqVect)
+double fitMeasureCalc(string cipherText, map<string, double> &ngram, int n)
 {
     double fitMeasure = 0;
-    for(unsigned int i = 0; i<freqVect.size(); i++){
-        fitMeasure += log10((static_cast<double>(freqVect[i].second)/static_cast<int>(freqVect.size())));
+    string ngram = "";
+    char temp;
+    for(int i = 0; i<cipherText.size(); i++){
+        fitMeasure += log10(ngram.get(cipherText.substr(i, (i+n))/ngram.size());
     }
+            
     return fitMeasure;
+}
+
+string decryptCipherString(string cipherText, vector<char> list)
+{
+    for(int i = 0; i<cipherText.size(); i++){
+        cipherText[i] = list[ (cipherText[i] - 'A')];
+    }
+    return cipherText;
 }

@@ -28,7 +28,7 @@ private:
     bool InOrderSubset(RBTreeNode<T, V>*, map<T, V>&);
     bool InOrderSubset(RBTreeNode<T, V>*, RBTreeNode<T, V>*);
     int InOrderNumPairs(RBTreeNode<T, V> *, int&);
-    bool InOrderAct(RBTreeNode<T, V> *, T, void (*)(T&, V&));
+    void InOrderAct(RBTreeNode<T, V> *, void (*)(T&, V&));
     void InOrderVector(RBTreeNode<T, V> *, vector<pair<T, V>>&);
 public:
     map();
@@ -59,8 +59,8 @@ public:
     template<class c, class m>
     friend ostream& operator<<(ostream& os, map<c, m>& obj);
 
-    bool InOrderAct(T key, void (*func)(T &key, V &var)){
-        return InOrderAct(RBTree<T, V>::root, key, func);
+    void InOrderAct(void (*func)(T &key, V &var)){
+        return InOrderAct(RBTree<T, V>::root, func);
     }
 
     void toVector(vector<pair<T, V>> &vect){
@@ -182,24 +182,17 @@ int map<T, V>::InOrderNumPairs(RBTreeNode<T, V> *nodePtr, int &count)
  * return true or false: true if the node is found and the action is completed
  */
 template<class T, class V>
-bool map<T, V>::InOrderAct(RBTreeNode<T, V> *nodePtr, T key, void (*func)(T &key, V &var))
+void map<T, V>::InOrderAct(RBTreeNode<T, V> *nodePtr, void (*func)(T &key, V &var))
 {
     // if the node is nil then return false
-    if(nodePtr == RBTree<T, V>::NIL)
-        return false;
-
-    // if the left finds the value then return true
-    if(InOrderAct(nodePtr->left, key, func))
-        return true;
-
-    // if the value is indeed found then do the action and return true
-    if(nodePtr->key == key){
+    if(nodePtr != RBTree<T, V>::NIL)
+        // if the left finds the value then return true
+        InOrderAct(nodePtr->left, func)
+        // if the value is indeed found then do the action and return true
         func(nodePtr->key, nodePtr->value);
-        return true;
+        // if right is reached return whatever it may be
+        InOrderAct(nodePtr->right, func);
     }
-
-    // if right is reached return whatever it may be
-    return InOrderAct(nodePtr->right, key, func);
 }
 
 /*
