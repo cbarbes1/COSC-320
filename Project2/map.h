@@ -185,9 +185,9 @@ template<class T, class V>
 void map<T, V>::InOrderAct(RBTreeNode<T, V> *nodePtr, void (*func)(T &key, V &var))
 {
     // if the node is nil then return false
-    if(nodePtr != RBTree<T, V>::NIL)
+    if(nodePtr != RBTree<T, V>::NIL){
         // if the left finds the value then return true
-        InOrderAct(nodePtr->left, func)
+        InOrderAct(nodePtr->left, func);
         // if the value is indeed found then do the action and return true
         func(nodePtr->key, nodePtr->value);
         // if right is reached return whatever it may be
