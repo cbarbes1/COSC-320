@@ -139,7 +139,7 @@ bool map<T, V>::InOrderSubset(RBTreeNode<T, V> *nodePtr, map<T, V> &other)
     if(nodePtr != RBTree<T, V>::NIL){
         bool left = InOrderSubset(nodePtr->left, other);
         bool right = InOrderSubset(nodePtr->right, other);
-        return (other.RBTree<T, V>::find(nodePtr->key) && left && right);
+        return ((other.RBTree<T, V>::findNode(nodePtr->key) == nodePtr->value) && left && right);
     }
     return true;
 }
@@ -155,7 +155,7 @@ bool map<T, V>::InOrderSubset(RBTreeNode<T, V> *nodePtr, RBTreeNode<T, V> *nilPt
     if(nodePtr != nilPtr){
         bool left = InOrderSubset(nodePtr->left, nilPtr);
         bool right = InOrderSubset(nodePtr->right, nilPtr);
-        return (RBTree<T, V>::find(nodePtr->key) && left && right);
+        return ((RBTree<T, V>::findNode(nodePtr->key) == nodePtr->value) && left && right);
     }
     return true;
 }
@@ -253,7 +253,7 @@ void map<T, V>::clear()
 template<class T, class V>
 void map<T, V>::insert(T key, V val)
 {
-    RBTreeNode<T, V> *newnode = new RBTreeNode<T, V>(key, val, RED, RBTree<T, V>::NIL, RBTree<T, V>::NIL, RBTree<T, V>::NIL);
+    
 	RBTreeNode<T, V> *y = RBTree<T, V>::NIL;
 	RBTreeNode<T, V> *x = RBTree<T, V>::root;
 
@@ -264,11 +264,12 @@ void map<T, V>::insert(T key, V val)
 		else if(key > x->key)
 			x = x->right;
         else{
-            delete newnode;
+            x->value = val;
             return;
         }
 	}
-
+	
+	RBTreeNode<T, V> *newnode = new RBTreeNode<T, V>(key, val, RED, RBTree<T, V>::NIL, RBTree<T, V>::NIL, RBTree<T, V>::NIL);
     newnode->parent = y;
     if (y == RBTree<T, V>::NIL)
         RBTree<T, V>::root = newnode;

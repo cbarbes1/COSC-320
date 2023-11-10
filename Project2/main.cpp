@@ -15,8 +15,8 @@ void RelativeFreqCalc(string &key, int &value);
 void freqAnalysis(string, vector<pair<char, int>>&);
 void replaceByFreq(vector<pair<char, int>>, vector<char>&);
 double fitMeasureCalc(string, map<string, int>&, int n);
-string decryptCipherString(string, vector<char>&);
-vector<char> transpose(vector<char>, int, int);
+void decryptCipherString(string&, vector<char>);
+void transpose(vector<char>&, int, int);
 
 bool comperator(pair<char, int> x, pair<char, int> y){
     return x.second > y.second;
@@ -33,6 +33,7 @@ int main()
 
     double fitMeasure = 0;
     double pfitMeasure = 0;
+    double prevfitMeasure = 0;
     int ngram = 3;
     string cipherText = "";
     string previousText = "";
@@ -111,57 +112,54 @@ int main()
     // after printing the key
 
     // decrypt the text once before the iterative steps begin
-    cipherText = decryptCipherString(cipherText, key);
+    decryptCipherString(cipherText, key);
 
     // obtain the fitness measure of the first decryption
     fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
     // print the measure
     cout<<fitMeasure<<endl;
+    
 
     // create vars for this segment
     pfitMeasure = fitMeasure -1;
-    for(int i = 0; i<UPPERBOUND && fitMeasure != pfitMeasure; i++){
+    for(int i = 0; i<UPPERBOUND && fitMeasure > pfitMeasure; i++){
         pfitMeasure = fitMeasure;
-        cout<<pfitMeasure<<endl;
-
         // step 1: make a transposition in the key
-        double previousMeasure = fitMeasure;
         for(int j = 0; j<NUMALPHA; j++){
-            for(int k = i+1; k<NUMALPHA; k++){
-                vector<char> testVector;
+            for(int k = j+1; k<NUMALPHA; k++){
+                vector<char> testKey;
                 // get the new key
-                testVector = transpose(key, j, k);
-                // get the previous tex
+                testKey = key;
+                transpose(key, j, k);
+                // get the previous text
                 previousText = cipherText;
                 // decrypt the string given the new key
-                cipherText = decryptCipherString(cipherText, testVector);
+                decryptCipherString(cipherText, key);
                 // calculate the fitness measure of the possible key
-                previousMeasure = fitMeasure;
+                prevfitMeasure = fitMeasure;
                 fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
-                if(fitMeasure != previousMeasure){ // if the fitness increases then keep the key
-                    key = testVector;
-                }else{ // if not set the text back to original and continue
+                if(fitMeasure <= prevfitMeasure){ // if the fitness increases then keep the key
+                    key = testKey;
                     cipherText = previousText;
-                    fitMeasure = previousMeasure;
                 }
             }
         }
+        
 
-        if(i == 4){
-            // print the key from the frequency substitution
-            cout<<"Key after 4 iterations of the kill climb algorithm:"<<endl;
-            for(int i = 0; i<NUMALPHA; i++)
-                cout<<static_cast<char>('A'+i);
-            cout<<endl;
-            // key after we replace them by frequency
-            for(unsigned int i = 0; i<key.size(); i++)
-                cout<<key[i];
-            cout<<endl;
-            // after printing the key
-        }
         fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
         cout<<fitMeasure<<endl;
     }
+    
+    // print the key from the frequency substitution
+    cout<<"Key after iterations of the kill climb algorithm:"<<endl;
+    for(int n = 0; n<NUMALPHA; n++)
+        cout<<static_cast<char>('A'+n);
+    cout<<endl;
+    // key after we replace them by frequency
+    for(unsigned int n = 0; n<key.size(); n++)
+        cout<<key[n];
+    cout<<endl;
+    // after printing the key
 
     cout<<cipherText<<endl;
 
@@ -212,22 +210,19 @@ double fitMeasureCalc(string cipherText, map<string, int> &Ngram, int n)
 }
 
 
-string decryptCipherString(string cipherText, vector<char> &list)
+void decryptCipherString(string &cipherText, vector<char> list)
 {
     for(unsigned int i = 0; i<cipherText.size(); i++){
         cipherText[i] = list[ (cipherText[i] - 'A')];
     }
-    return cipherText;
 }
 
 
-vector<char> transpose(vector<char> key, int first, int second)
+void transpose(vector<char> &key, int first, int second)
 {
-    vector<char> vect = key;
-    char temp = vect[first];
-    vect[first] = vect[second];
-    vect[second] = temp;
-
-    return vect;
+    char temp = key[first];
+    key[first] = key[second];
+    key[second] = temp;
+    
 }
 
