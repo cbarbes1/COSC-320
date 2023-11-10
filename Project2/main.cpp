@@ -11,32 +11,45 @@
 using namespace std;
 
 const string Replacer = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+const int NUMALPHA = 26;
+const int UPPERBOUND = 100;
 void RelativeFreqCalc(string &key, int &value);
 void freqAnalysis(string, vector<pair<char, int>>&);
 void replaceByFreq(vector<pair<char, int>>, vector<char>&);
-double fitMeasureCalc(string, map<string, int>&, int n);
+double fitMeasureCalc(string, map<string, double>&, int);
 void decryptCipherString(string&, vector<char>);
 void transpose(vector<char>&, int, int);
+void HillClimb(map<string, double>, vector<char>&, string, double&, int);
 
 bool comperator(pair<char, int> x, pair<char, int> y){
     return x.second > y.second;
 }
 
+void apply1(string &key, double &value, double applyAgent)
+{
+    value /= applyAgent;
+}
+
+void apply2(string &key, double &value, double applyAgent)
+{
+    value = log10(value);
+}
+
 int main()
 {
-    const int NUMALPHA = 26;
-    const int UPPERBOUND = 100;
-    map<string, int> NGramMap;
+    
+    map<string, double> NGramMap;
     map<char, int> FreqMap;
     vector<char> key;
     vector<pair<char, int>> Freqs;
 
     double fitMeasure = 0;
     double pfitMeasure = 0;
-    double prevfitMeasure = 0;
+    double numEngChars = 0;
     int ngram = 3;
     string cipherText = "";
     string previousText = "";
+    string newText = "";
     
     // create the key vector as just normally A-Z
     for(int i = 0; i<NUMALPHA; i++)
@@ -54,16 +67,19 @@ int main()
     ifstream InFile1(filename1);// open the file for input
     if(InFile1){
         string word = "";
-        int freq = 0;
+        double freq = 0;
         // load the information into the map then proceed
         while(InFile1){
 
             InFile1>>word>>freq;
             InFile1.ignore(256, '\n');
-
+            numEngChars+=freq;
             NGramMap.set(word, freq);
         }
         ngram = word.size();
+        
+        NGramMap.InOrderAct(apply1, numEngChars);
+        NGramMap.InOrderAct(apply2, 0);
     }else{
         cerr<<"N-Gram file is needed to proceed, exiting\n";
     }
@@ -110,48 +126,26 @@ int main()
         cout<<key[i];
     cout<<endl;
     // after printing the key
-
+    
+    newText = cipherText;
     // decrypt the text once before the iterative steps begin
-    decryptCipherString(cipherText, key);
+    decryptCipherString(newText, key);
 
     // obtain the fitness measure of the first decryption
-    fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
+    fitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
     // print the measure
     cout<<fitMeasure<<endl;
     
-
-    // create vars for this segment
     pfitMeasure = fitMeasure -1;
-    for(int i = 0; i<UPPERBOUND && fitMeasure > pfitMeasure; i++){
+    int i = 0;
+    for(i = 0; i<UPPERBOUND && fitMeasure > pfitMeasure; i++){
         pfitMeasure = fitMeasure;
-        // step 1: make a transposition in the key
-        for(int j = 0; j<NUMALPHA; j++){
-            for(int k = j+1; k<NUMALPHA; k++){
-                vector<char> testKey;
-                // get the new key
-                testKey = key;
-                transpose(key, j, k);
-                // get the previous text
-                previousText = cipherText;
-                // decrypt the string given the new key
-                decryptCipherString(cipherText, key);
-                // calculate the fitness measure of the possible key
-                prevfitMeasure = fitMeasure;
-                fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
-                if(fitMeasure <= prevfitMeasure){ // if the fitness increases then keep the key
-                    key = testKey;
-                    cipherText = previousText;
-                }
-            }
-        }
-        
-
-        fitMeasure = fitMeasureCalc(cipherText, NGramMap, ngram);
-        cout<<fitMeasure<<endl;
+        HillClimb(NGramMap, key, cipherText, fitMeasure, ngram);
+        //fitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
     }
     
     // print the key from the frequency substitution
-    cout<<"Key after iterations of the kill climb algorithm:"<<endl;
+    cout<<"Key after "<<i<<" iterations of the kill climb algorithm:"<<endl;
     for(int n = 0; n<NUMALPHA; n++)
         cout<<static_cast<char>('A'+n);
     cout<<endl;
@@ -188,22 +182,20 @@ void replaceByFreq(vector<pair<char, int>> Freq, vector<char> &key)
 }
 
 
-double fitMeasureCalc(string cipherText, map<string, int> &Ngram, int n)
+double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n)
 {
     double fitMeasure = 0;
     string ngram = "";
     int frequency = 0;
     double relFrequency = 0;
-    int sizeOfMap = Ngram.size();
     for(unsigned int i = 0; i<cipherText.size(); i++){
         ngram = cipherText.substr(i, (i+n));
         try{
-            frequency = Ngram.get(ngram);
-            relFrequency = static_cast<double>(frequency)/sizeOfMap;
+            relFrequency = Ngram.get(ngram);
         }catch(const exception &e){
-            relFrequency = 1.00/100.00;
+            relFrequency = log10(1.00/100.00);
         }
-        fitMeasure += log10(relFrequency);
+        fitMeasure += relFrequency;
     }
             
     return fitMeasure;
@@ -223,6 +215,31 @@ void transpose(vector<char> &key, int first, int second)
     char temp = key[first];
     key[first] = key[second];
     key[second] = temp;
-    
 }
 
+void HillClimb(map<string, double> NGramMap, vector<char> &key, string cipherText, double &fitMeasure, int ngram)
+{
+    cout<<fitMeasure<<endl;
+    string newText = "";
+    // step 1: make a transposition in the key
+    for(int j = 0; j<NUMALPHA; j++){
+        for(int k = j+1; k<NUMALPHA; k++){
+            vector<char> testKey;
+            // get the new key
+            testKey = key;
+            transpose(testKey, j, k);
+            // get the previous text
+            newText = cipherText;
+            // decrypt the string given the new key
+            decryptCipherString(newText, testKey);
+            double prevfitMeasure = fitMeasure;
+            fitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
+            if(fitMeasure > prevfitMeasure){ // if the fitness increases then keep the key
+                key = testKey;
+            }else{
+                fitMeasure = prevfitMeasure;
+            }
+        }
+    }
+    cout<<fitMeasure<<endl;
+}
