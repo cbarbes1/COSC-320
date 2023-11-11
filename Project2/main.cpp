@@ -13,33 +13,35 @@ using namespace std;
 const string Replacer = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
 const int NUMALPHA = 26;
 const int UPPERBOUND = 100;
-void RelativeFreqCalc(string &key, int &value);
-void freqAnalysis(string, vector<pair<char, int>>&);
-void replaceByFreq(vector<pair<char, int>>, vector<char>&);
-double fitMeasureCalc(string, map<string, double>&, int);
-void decryptCipherString(string&, vector<char>);
-void transpose(vector<char>&, int, int);
-void HillClimb(map<string, double>, vector<char>&, string, double&, int);
+
+
+void freqAnalysis(string, vector<pair<char, int>>&); // frequency analyze individual characters in a file
+void replaceByFreq(vector<pair<char, int>>, vector<char>&); // go through a key and replace each char with its paired frequency char
+double fitMeasureCalc(string, map<string, double>&, int); // calculate the fitness of the text
+void decryptCipherString(string&, vector<char>); // decrypt the text
+void transpose(vector<char>&, int, int); // transpose 2 chars
+void HillClimb(map<string, double>, vector<char>&, string, double&, int); // hill climbing analysis step
 
 bool comperator(pair<char, int> x, pair<char, int> y){
     return x.second > y.second;
 }
 
+
 void apply1(string &key, double &value, double applyAgent)
 {
-    value /= applyAgent;
+    value = value/applyAgent;
 }
 
 void apply2(string &key, double &value, double applyAgent)
 {
-    value = log10(value);
+    value = log(value);
 }
 
 int main()
 {
     
     map<string, double> NGramMap;
-    map<char, int> FreqMap;
+
     vector<char> key;
     vector<pair<char, int>> Freqs;
 
@@ -118,15 +120,16 @@ int main()
 
     // print the key from the frequency substitution
     cout<<"Key from single character frequency analysis:"<<endl;
-    for(int i = 0; i<NUMALPHA; i++)
+    for(int i = 0; i<NUMALPHA; i++){
         cout<<static_cast<char>('A'+i);
+    }
     cout<<endl;
-    // key after we replace them by frequency
-    for(unsigned int i = 0; i<key.size(); i++)
+    for(int i = 0; i<NUMALPHA; i++){
         cout<<key[i];
+    }
     cout<<endl;
     // after printing the key
-    
+    string strtmp = cipherText;
     newText = cipherText;
     // decrypt the text once before the iterative steps begin
     decryptCipherString(newText, key);
@@ -145,7 +148,7 @@ int main()
     }
     
     // print the key from the frequency substitution
-    cout<<"Key after "<<i<<" iterations of the kill climb algorithm:"<<endl;
+    cout<<"Key after "<<(i+1)<<" iterations of the kill climb algorithm:"<<endl;
     for(int n = 0; n<NUMALPHA; n++)
         cout<<static_cast<char>('A'+n);
     cout<<endl;
@@ -155,8 +158,25 @@ int main()
     cout<<endl;
     // after printing the key
 
+    decryptCipherString(cipherText, key);
     cout<<cipherText<<endl;
 
+    ifstream newKey("tmp.txt");
+    string temp;
+    vector<char> actualKey;
+    newKey>>temp>>temp;
+    char tmp;
+    char other;
+    int l = 0;
+    while(newKey>>tmp>>other){
+        actualKey.push_back(other);
+        l++;
+    }
+    decryptCipherString(strtmp, actualKey);
+
+    cout<<strtmp<<endl;
+
+    newKey.close();
     InFile1.close();
     InFile2.close();
     return 0;
@@ -186,7 +206,6 @@ double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n)
 {
     double fitMeasure = 0;
     string ngram = "";
-    int frequency = 0;
     double relFrequency = 0;
     for(unsigned int i = 0; i<cipherText.size(); i++){
         ngram = cipherText.substr(i, (i+n));
@@ -202,10 +221,11 @@ double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n)
 }
 
 
-void decryptCipherString(string &cipherText, vector<char> list)
+void decryptCipherString(string &cipher, vector<char> key)
 {
-    for(unsigned int i = 0; i<cipherText.size(); i++){
-        cipherText[i] = list[ (cipherText[i] - 'A')];
+    for(unsigned int i = 0; i<cipher.length(); i++){
+        int index = static_cast<int>(distance(key.begin(), find(key.begin(), key.end(), cipher[i])));
+        cipher[i] ='A'+index;
     }
 }
 
