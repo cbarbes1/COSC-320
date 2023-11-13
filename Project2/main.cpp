@@ -5,6 +5,7 @@
 #include "tinyfiledialogs.h"
 #include <algorithm>
 #include <cmath>
+#include <stack>
 #include <string>
 #include <exception>
 
@@ -34,7 +35,7 @@ void apply1(string &key, double &value, double applyAgent)
 
 void apply2(string &key, double &value, double applyAgent)
 {
-    value = log(value);
+    value = log10(value);
 }
 
 int main()
@@ -142,9 +143,18 @@ int main()
     pfitMeasure = fitMeasure -1;
     int i = 0;
     for(i = 0; i<UPPERBOUND && fitMeasure > pfitMeasure; i++){
+
         pfitMeasure = fitMeasure;
         HillClimb(NGramMap, key, cipherText, fitMeasure, ngram);
-        //fitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
+        // print the key from the frequency substitution
+        cout<<"Key after "<<(i+1)<<" iterations of the kill climb algorithm:"<<endl;
+        for(int n = 0; n<NUMALPHA; n++)
+            cout<<static_cast<char>('A'+n);
+        cout<<endl;
+        // key after we replace them by frequency
+        for(unsigned int n = 0; n<key.size(); n++)
+            cout<<key[n];
+        cout<<endl;
     }
     
     // print the key from the frequency substitution
@@ -157,26 +167,9 @@ int main()
         cout<<key[n];
     cout<<endl;
     // after printing the key
-
     decryptCipherString(cipherText, key);
     cout<<cipherText<<endl;
 
-    ifstream newKey("tmp.txt");
-    string temp;
-    vector<char> actualKey;
-    newKey>>temp>>temp;
-    char tmp;
-    char other;
-    int l = 0;
-    while(newKey>>tmp>>other){
-        actualKey.push_back(other);
-        l++;
-    }
-    decryptCipherString(strtmp, actualKey);
-
-    cout<<strtmp<<endl;
-
-    newKey.close();
     InFile1.close();
     InFile2.close();
     return 0;
@@ -208,7 +201,7 @@ double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n)
     string ngram = "";
     double relFrequency = 0;
     for(unsigned int i = 0; i<cipherText.size(); i++){
-        ngram = cipherText.substr(i, (i+n));
+        ngram = cipherText.substr(i, (i+n-1));
         try{
             relFrequency = Ngram.get(ngram);
         }catch(const exception &e){
@@ -216,7 +209,6 @@ double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n)
         }
         fitMeasure += relFrequency;
     }
-            
     return fitMeasure;
 }
 
@@ -239,27 +231,34 @@ void transpose(vector<char> &key, int first, int second)
 
 void HillClimb(map<string, double> NGramMap, vector<char> &key, string cipherText, double &fitMeasure, int ngram)
 {
-    cout<<fitMeasure<<endl;
     string newText = "";
+
+    double newfitMeasure = 0;
+    //double tmpFit = fitMeasure;
+    vector<char> testKey = key;
+    //stack<pair<int, int>> saveIndex;
     // step 1: make a transposition in the key
     for(int j = 0; j<NUMALPHA; j++){
         for(int k = j+1; k<NUMALPHA; k++){
-            vector<char> testKey;
             // get the new key
             testKey = key;
-            transpose(testKey, j, k);
-            // get the previous text
+            char temp = key[j];
+            key[j] = key[k];
+            key[k] = temp;
+             // get the previous text
             newText = cipherText;
+
             // decrypt the string given the new key
             decryptCipherString(newText, testKey);
-            double prevfitMeasure = fitMeasure;
-            fitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
-            if(fitMeasure > prevfitMeasure){ // if the fitness increases then keep the key
+            newfitMeasure = fitMeasureCalc(newText, NGramMap, ngram);
+            if(newfitMeasure > fitMeasure){ // if the fitness increases then keep the key
                 key = testKey;
-            }else{
-                fitMeasure = prevfitMeasure;
+                fitMeasure = newfitMeasure;
             }
         }
     }
-    cout<<fitMeasure<<endl;
+
+
+
+
 }
