@@ -7,7 +7,7 @@ OBJS = main.o tinyfiledialogs.o
 $(PROG) : $(OBJS)
 	$(CC) -o $(PROG) $(OBJS)
 
-main.o : main.cpp RBTree.h map.h
+main.o : main.cpp RBTree.h Map.h
 	$(CC) $(CPPFLAGS) -c main.cpp
 
 tinyfiledialogs.o : tinyfiledialogs.cpp

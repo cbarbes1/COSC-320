@@ -6,7 +6,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "map.h"
+#include "Map.h"
 #include "tinyfiledialogs.h"
 #include <algorithm>
 #include <cmath>
@@ -23,21 +23,23 @@ const int UPPERBOUND = 100;
 
 void freqAnalysis(string, vector<pair<char, int>>&); // frequency analyze individual characters in a file
 void replaceByFreq(vector<pair<char, int>>, vector<char>&); // go through a key and replace each char with its paired frequency char
-double fitMeasureCalc(string, map<string, double>&, int, double); // calculate the fitness of the text
+double fitMeasureCalc(string, Map<string, double>&, int, double); // calculate the fitness of the text
 void decryptCipherString(string&, vector<char>); // decrypt the text
 void transpose(vector<char>&, int, int); // transpose 2 chars
-void HillClimb(map<string, double>, vector<char>&, string, double&, int, double); // hill climbing analysis step
+bool HillClimb(Map<string, double>, vector<char>&, string, double&, int, double); // hill climbing analysis step
 
+// make function to use as a comparator in the sort function
 bool comperator(pair<char, int> x, pair<char, int> y){
     return x.second > y.second;
 }
 
-
+// create an apply function to find the relative frequency 
 void apply1(string &key, double &value, double applyAgent)
 {
     value = value/applyAgent;
 }
 
+// create an apply function for taking the log 
 void apply2(string &key, double &value, double applyAgent)
 {
     value = log10(value);
@@ -45,14 +47,11 @@ void apply2(string &key, double &value, double applyAgent)
 
 int main()
 {
-    
-    map<string, double> NGramMap;
-
+    // create storage container
+    Map<string, double> NGramMap;
     vector<char> key;
     vector<pair<char, int>> Freqs;
-
     double fitMeasure = 0;
-    double pfitMeasure = 0;
     double numEngChars = 0;
     int ngram = 3;
     string cipherText = "";
@@ -78,16 +77,15 @@ int main()
         double freq = 0;
         // load the information into the map then proceed
         while(InFile1){
-
-            InFile1>>word>>freq;
+            InFile1>>word>>freq; // grab the line
             InFile1.ignore(256, '\n');
-            numEngChars+=freq;
-            NGramMap.set(word, freq);
+            numEngChars+=freq; // sum the frequency into the total
+            NGramMap.set(word, freq); // set the key into the map
         }
-        ngram = word.size();
+        ngram = word.size(); // get the size
         
-        NGramMap.InOrderAct(apply1, numEngChars);
-        NGramMap.InOrderAct(apply2, 0);
+        NGramMap.InOrderAct(apply1, numEngChars); // divide each value by the number of chars
+        NGramMap.InOrderAct(apply2, 0); // take the log of all the values
     }else{
         cerr<<"N-Gram file is needed to proceed, exiting\n";
     }
@@ -101,12 +99,12 @@ int main()
     if(InFile2){
         // load the information into the map then proceed
         char buf;
-        while(InFile2>>buf){
-            if(buf != '\n')
+        while(InFile2>>buf){ // while the buffer gets value 
+            if(buf != '\n') // if not an end line add to the string
                 cipherText += buf;
         }
 
-        freqAnalysis(cipherText, Freqs);
+        freqAnalysis(cipherText, Freqs); // frequency analyze each char in the file
     }else{
         cerr<<"cipher text file is needed to proceed, exiting"<<endl;
     }
@@ -134,6 +132,7 @@ int main()
         cout<<key[i];
     }
     cout<<endl;
+    
     // after printing the key
     string strtmp = cipherText;
     newText = cipherText;
@@ -142,28 +141,16 @@ int main()
 
     // obtain the fitness measure of the first decryption
     fitMeasure = fitMeasureCalc(newText, NGramMap, ngram, numEngChars);
-    // print the measure
-    cout<<fitMeasure<<endl;
     
-    pfitMeasure = fitMeasure -1;
     int i = 0;
-    for(i = 0; i<UPPERBOUND && fitMeasure > pfitMeasure; i++){
-
-        pfitMeasure = fitMeasure;
-        HillClimb(NGramMap, key, cipherText, fitMeasure, ngram, numEngChars);
-        // print the key from the frequency substitution
-        cout<<"Key after "<<(i+1)<<" iterations of the kill climb algorithm:"<<endl;
-        for(int n = 0; n<NUMALPHA; n++)
-            cout<<static_cast<char>('A'+n);
-        cout<<endl;
-        // key after we replace them by frequency
-        for(unsigned int n = 0; n<key.size(); n++)
-            cout<<key[n];
-        cout<<endl;
+    bool checker = true;
+    for(i = 0; i<UPPERBOUND && checker; i++){
+        checker = false;
+        checker = HillClimb(NGramMap, key, cipherText, fitMeasure, ngram, numEngChars);
     }
     
     // print the key from the frequency substitution
-    cout<<"Key after "<<(i+1)<<" iterations of the kill climb algorithm:"<<endl;
+    cout<<"Key after "<<i<<" iterations of the Hill Climb algorithm:"<<endl;
     for(int n = 0; n<NUMALPHA; n++)
         cout<<static_cast<char>('A'+n);
     cout<<endl;
@@ -172,16 +159,20 @@ int main()
         cout<<key[n];
     cout<<endl;
     // after printing the key
-    decryptCipherString(cipherText, key);
-    cout<<cipherText<<endl;
+    
+    decryptCipherString(cipherText, key); //decrypt the text
+    cout<<cipherText<<endl; // print the text
 
+    // close the file
     InFile1.close();
     InFile2.close();
     return 0;
 
 }
 
-
+/* Description: frequency analyze each char in the ciphertext
+ * parameters: String for the cipher, vector with the frequencies of each char
+ */
 void freqAnalysis(string cipher, vector<pair<char, int>> &output)
 {
     for(unsigned int i = 0; i<cipher.size(); i++){
@@ -189,44 +180,60 @@ void freqAnalysis(string cipher, vector<pair<char, int>> &output)
     }
 }
 
+/* Description: Replace each key entry with its english language counter part
+ * parameters: the frequency vector and the key
+ */
 void replaceByFreq(vector<pair<char, int>> Freq, vector<char> &key)
 {
+    // sort the vector in descending order
     sort(Freq.begin(), Freq.end(), comperator);
     int spos = 0;
-    for(unsigned int i = 0; i<Freq.size(); i++){
-        int pos = (Freq[i].first - 'A');
-        key[pos] = Replacer[spos++];
+    for(unsigned int i = 0; i<Freq.size(); i++){ 
+        int pos = (Freq[i].first - 'A'); // get the position
+        key[pos] = Replacer[spos++]; // get the char from the replacer
     }
 }
 
-
-double fitMeasureCalc(string cipherText, map<string, double> &Ngram, int n, double numChars)
+/* Description:
+ * parameters: the string, the map , the number, the number of chars in the trigram
+ * return: the fitness measure
+ */
+double fitMeasureCalc(string cipherText, Map<string, double> &Ngram, int n, double numChars)
 {
     double fitMeasure = 0;
     string ngram = "";
     double relFrequency = 0;
-    for(unsigned int i = 0; i<cipherText.size(); i++){
-        ngram = cipherText.substr(i, (i+n-1));
-        try{
+    for(unsigned int i = 0; i<cipherText.size()-n; i++){
+        ngram = cipherText.substr(i, n);// get the piece of text to find
+        if(Ngram.find(ngram)){// if the ngram is found then get the relative frequency 
             relFrequency = Ngram.get(ngram);
-        }catch(const exception &e){
+        }else{ // if not then place the constant in
             relFrequency = log10((1.00/100.0)/numChars);
         }
-        fitMeasure += relFrequency;
+        fitMeasure += relFrequency; // add into the fitmeasure
     }
     return fitMeasure;
 }
 
-
+/* Description: decrypt the string
+ * parameters: the string and the key vector
+ */
 void decryptCipherString(string &cipher, vector<char> key)
 {
+    bool found = false; // grab the test var
     for(unsigned int i = 0; i<cipher.length(); i++){
-        int index = static_cast<int>(distance(key.begin(), find(key.begin(), key.end(), cipher[i])));
-        cipher[i] ='A'+index;
+        found = false; //set to false
+        for(int j = 0; j < NUMALPHA && !found; j++){
+            if(cipher[i] == key[j]){ // check if the char is the char in the key
+                found = true;
+                cipher[i] = 'A' + j; // set the letter into it
+            }
+        }
     }
 }
 
-
+/* Description: transpose 2 vector entries
+ */
 void transpose(vector<char> &key, int first, int second)
 {
     char temp = key[first];
@@ -234,19 +241,21 @@ void transpose(vector<char> &key, int first, int second)
     key[second] = temp;
 }
 
-void HillClimb(map<string, double> NGramMap, vector<char> &key, string cipherText, double &fitMeasure, int ngram, double numChars)
+/* Description: transpose characters and test if that choise was valuable
+ * parameters: the map, the key, the string, the fitmeasure, the number of grams, the number of chars
+ * return true if something was changed and false if nothing changed
+ */
+bool HillClimb(Map<string, double> NGramMap, vector<char> &key, string cipherText, double &fitMeasure, int ngram, double numChars)
 {
     string newText = "";
-
+    bool checker = false;
     double newfitMeasure = 0;
-    //double tmpFit = fitMeasure;
-    vector<char> testKey = key;
-    //stack<pair<int, int>> saveIndex;
     // step 1: make a transposition in the key
     for(int j = 0; j<NUMALPHA; j++){
         for(int k = j+1; k<NUMALPHA; k++){
+            vector<char> testKey = key;
             // get the new key
-            transpose(key, j, k);
+            transpose(testKey, j, k);
              // get the previous text
             newText = cipherText;
 
@@ -256,9 +265,12 @@ void HillClimb(map<string, double> NGramMap, vector<char> &key, string cipherTex
             if(newfitMeasure > fitMeasure){ // if the fitness increases then keep the key
                 key = testKey;
                 fitMeasure = newfitMeasure;
+                checker = true;
             }
         }
 
     }
+    
+    return checker;
 
 }
