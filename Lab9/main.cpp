@@ -1,3 +1,7 @@
+/* Author: Dr. Spickler 
+ * Last Edited by : Harrison Colborne and Cole Barbes
+ * Last Date Edited: 10/17/23
+ */
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -50,16 +54,32 @@ void div(){
 }
 
 int main() {
-	ListOfLists<int> adjMatrix(7, 7);
+	ListOfLists<int> adjMatrix(6, 6);
+    ListOfLists<int> adjMatrix2(10, 10);
 
-    adjMatrix[0] = { 0, 0, 1, 1, 0, 1, 0 };
-	adjMatrix[1] = { 0, 0, 0, 1, 1, 0, 0 };
-	adjMatrix[2] = { 1, 0, 0, 0, 0, 1, 0 };
-	adjMatrix[3] = { 1, 1, 0, 0, 1, 1, 0 };
-	adjMatrix[4] = { 0, 1, 0, 1, 0, 0, 0 };
-	adjMatrix[5] = { 1, 0, 1, 1, 0, 0, 0 };
-	adjMatrix[6] = { 0, 0, 0, 0, 0, 0, 0 };
-
+    // create an adjacency matrix for a undirected graph
+    adjMatrix[0] = { 0, 0, 1, 1, 0, 1};
+	adjMatrix[1] = { 0, 0, 0, 1, 1, 0};
+	adjMatrix[2] = { 1, 0, 0, 0, 0, 1};
+	adjMatrix[3] = { 1, 1, 0, 0, 1, 1};
+	adjMatrix[4] = { 0, 1, 0, 1, 0, 0};
+	adjMatrix[5] = { 1, 0, 1, 1, 0, 0};
+    //
+    
+    // create an adjacency matrix for a directed graph
+    adjMatrix2[0] = { 0, 0, 0, 0, 1, 0, 0, 1, 0, 0};
+	adjMatrix2[1] = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+	adjMatrix2[2] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	adjMatrix2[3] = { 1, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+	adjMatrix2[4] = { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
+	adjMatrix2[5] = { 0, 1, 1, 0, 0, 0, 1, 0, 1, 0};
+	adjMatrix2[6] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    adjMatrix2[7] = { 0, 0, 0, 0, 1, 0, 0, 0, 1, 0};
+    adjMatrix2[8] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+    adjMatrix2[9] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+    //
+    
+    cout<<"Undirected Graph: "<<endl;
 	Print(adjMatrix);
 	cout << endl;
 
@@ -69,30 +89,21 @@ int main() {
 	breadthFirstSearch(adjMatrix);
 	cout << endl;
 
+    cout<<"Directed Graph: "<<endl;
+    Print(adjMatrix2);
+	cout << endl;
+
+	depthFirstSearch(adjMatrix2);
+	cout << endl;
+
+	breadthFirstSearch(adjMatrix2);
+	cout << endl;
+    
+    
 	return 0;
 }
 
-template<class T>
-int findVertexPos(ListOfLists<T> G, T vert) {
-	int vPos = -1;
-	for (int j = 0; j < G.size(); j++) {
-		if (G[j][0] == vert)
-			vPos = j;
-	}
-	return vPos;
-}
-
-template<class T>
-int findVertexPos(vector<T> L, T vert) {
-	int vPos = -1;
-	for (int j = 0; j < L.size(); j++) {
-		if (L[j] == vert)
-			vPos = j;
-	}
-	return vPos;
-}
-
-//  Assumes the graph is given as adjacency lists.
+//does the first step of the depthFirstSearch
 template<class T>
 void depthFirstSearch(ListOfLists<T> G) {
 	vector<int> num;
@@ -104,7 +115,6 @@ void depthFirstSearch(ListOfLists<T> G) {
 
 	while (find(num.begin(), num.end(), 0) < num.end()) {
 		int pos = find(num.begin(), num.end(), 0) - num.begin();
-        cout<<"Before DFS"<<endl;
 		DFS(G, num, pos, count, E);
 	}
 
@@ -112,119 +122,63 @@ void depthFirstSearch(ListOfLists<T> G) {
 		cout << static_cast<char>(e.f +'a') << " - " << static_cast<char>(e.t+'a') << endl;
 }
 
+//does the recursive step of the depthFirstSearch
+// below we changed how the for loop executes so it does a depth first breadth first
+// 
 template<class T>
-void DFS(ListOfLists<T> G, vector<int> &num, int pos, int &count,
-		vector<edge<T>> &E) {
-	vector<T> Adj = G[pos];
+void DFS(ListOfLists<T> G, vector<int> &num, int pos, int &count, vector<edge<T>> &E) {
+	vector<T> Adj = G[pos]; // save the row into adj 
+    
 	num[pos] = count++;
 
-	for (int i = 0; i < Adj.size(); i++) {
-		T vert = Adj[i];
+	for (int i = 0; i < G.size(); i++) {
+		T vert = Adj[i]; // save the value in the adjacent node list
 
-		if (vert == 1 && num[i] == 0) {
+		if (vert == 1 && (num[i] == 0 || num[i] == (i+1))) { // if there is a node and we either reached the end or num has no value in this position
 			E.push_back( {pos, i});
-            DFS(G, num, ++pos, count, E);
+			DFS(G, num, i, count, E);
 		}
-		
 	}
 	
 }
 
+// Does the breadthFirstSearch
 template<class T>
 void breadthFirstSearch(ListOfLists<T> G) {
 	vector<int> num;
-	vector<T> V;
 	vector<edge<T>> E;
 	deque<T> queue;
 	int count = 1;
 
 	for (int i = 0; i < G.size(); i++) {
-		num.push_back(0);
-		V.push_back(G[i][0]);
+		num.push_back(0); 
 	}
 
 	while (find(num.begin(), num.end(), 0) < num.end()) {
 		int pos = find(num.begin(), num.end(), 0) - num.begin();
-		num[pos] = count++;
-		queue.push_back(G[pos][0]);
+		num[pos] = count++; // save in the num vector the position we have reached
+		queue.push_back(pos); // save the first node in the queue to start algorithm
 		while (!queue.empty()) {
-			T vert = queue.front();
+			T vert = queue.front(); // pop off the front 
 			queue.pop_front();
-			int vPos = findVertexPos(G, vert);
-			vector<T> Adj = G[vPos];
-			for (int i = 1; i < Adj.size(); i++) {
-				int AdjvPos = findVertexPos(G, Adj[i]);
-				if (num[AdjvPos] == 0) {
-					num[AdjvPos] = count++;
-					queue.push_back(Adj[i]);
-					E.push_back( { vert, Adj[i] });
+			vector<T> Adj = G[vert]; // save the vector at this vertex position
+			for (int i = 0; i < Adj.size(); i++) {
+				if ((num[i] == 0 || num[i] == (i+1)) && Adj[i] == 1) {
+					num[i] = count++;
+					queue.push_back(i);
+					E.push_back( { vert , i});
 				}
 			}
 		}
+		
 	}
 
 	for (edge<T> e : E)
-		cout << e.f << " - " << e.t << endl;
+		cout << static_cast<char>(e.f +'a') << " - " << static_cast<char>(e.t+'a') << endl;
 }
 
-template<class T>
-void AddNode(ListOfLists<T> &G, T n) {
-	bool found = false;
-	for (int i = 0; i < G.size(); i++) {
-		if (G[i].size() > 0 && G[i][0] == n)
-			found = true;
-	}
 
-	if (!found) {
-		G.addRow();
-		G[G.size() - 1].push_back(n);
-	}
-}
-
-template<class T>
-void AddEdge(ListOfLists<T> &G, T f, T t) {
-	int index = -1;
-	for (int i = 0; i < G.size(); i++) {
-		if (G[i].size() > 0 && G[i][0] == f)
-			index = i;
-	}
-
-	bool found = false;
-	if (index >= 0) {
-		for (int i = 1; i < G[index].size(); i++) {
-			if (G[index][i] == t)
-				found = true;
-		}
-	} else
-		return;
-
-	if (!found) {
-		G[index].push_back(t);
-	}
-}
-
-template<class T>
-void AddEdges(ListOfLists<T> &G, T f, vector<T> tv) {
-	int index = -1;
-	for (int i = 0; i < G.size(); i++) {
-		if (G[i].size() > 0 && G[i][0] == f)
-			index = i;
-	}
-
-	if (index == -1)
-		return;
-
-	for (int j = 0; j < tv.size(); j++) {
-		bool found = false;
-		for (int i = 1; i < G[index].size(); i++) {
-			if (G[index][i] == tv[j])
-				found = true;
-		}
-		if (!found)
-			G[index].push_back(tv[j]);
-	}
-}
-
+//Prints the ListOfLists
 template<class T>
 void Print(ListOfLists<T> L) {
 	if (L.size() == 0)
