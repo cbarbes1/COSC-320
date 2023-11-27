@@ -90,6 +90,8 @@ bool detectCycles(ListOfLists<int> G);
 
 void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle);
 
+vector<int> KruskalAlgorithm(ListOfLists<int> G);
+
 void div(){
 	cout << "\n---------------------------------\n\n";
 }
@@ -97,7 +99,7 @@ void div(){
 int main() {
 
 	int type = 0;
-	cout<<"Please enter what algorithm to run: (0: Breadth First, 1: Depth First, 3: Dijkstras, 4: Ford's, 5: Cycle Detection, )";
+	cout<<"Please enter what algorithm to run: (0: Depth First, 1: Breadth First, 3: Dijkstras, 4: Ford's, 5: Cycle Detection, )";
 	cin>>type;
 
 	ListOfLists<int> graphAdj;
@@ -114,7 +116,13 @@ int main() {
 		cout<<endl;
 	}
 
-	if(type == 3){
+	if(type == 0){
+		depthFirstSearch(graphAdj);
+		cout << endl;
+	}else if(type == 1){
+		breadthFirstSearch(graphAdj);
+		cout << endl;
+	}else if(type == 3){
 		vector<double> weightVect = DijkstraAlgorithm(graphAdj, 3);
 
 		for(unsigned int i = 0; i<weightVect.size(); i++){
@@ -149,69 +157,15 @@ int main() {
 		}else{
 			cout<<"No Cycle Detected"<<endl;
 		}
+	}else if(type == 6){
+
+	}else if(type == 7){
+
+	}else if(type==8){
+
+	}else{
+		cout<<"Invalid Selection"<<endl;
 	}
-
-	/*
-	ListOfLists<int> adjMatrix(6, 6);
-    ListOfLists<int> adjMatrix2(10, 10);
-	ListOfLists<int> adjMatrix3(10, 10);
-
-    // create an adjacency matrix for a undirected graph
-    adjMatrix[0] = { 0, 0, 1, 1, 0, 1};
-	adjMatrix[1] = { 0, 0, 0, 1, 1, 0};
-	adjMatrix[2] = { 1, 0, 0, 0, 0, 1};
-	adjMatrix[3] = { 1, 1, 0, 0, 1, 1};
-	adjMatrix[4] = { 0, 1, 0, 1, 0, 0};
-	adjMatrix[5] = { 1, 0, 1, 1, 0, 0};
-    //
-    
-    // create an adjacency matrix for a directed graph
-    adjMatrix2[0] = { 0, 0, 0, 0, 1, 0, 0, 1, 0, 0};
-	adjMatrix2[1] = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 0};
-	adjMatrix2[2] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	adjMatrix2[3] = { 1, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-	adjMatrix2[4] = { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0};
-	adjMatrix2[5] = { 0, 1, 1, 0, 0, 0, 1, 0, 1, 0};
-	adjMatrix2[6] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    adjMatrix2[7] = { 0, 0, 0, 0, 1, 0, 0, 0, 1, 0};
-    adjMatrix2[8] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-    adjMatrix2[9] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
-    //
-    
-    cout<<"Undirected Graph: "<<endl;
-	Print(adjMatrix);
-	cout << endl;
-
-	depthFirstSearch(adjMatrix);
-	cout << endl;
-
-	breadthFirstSearch(adjMatrix);
-	cout << endl;
-
-    cout<<"Directed Graph: "<<endl;
-    Print(adjMatrix2);
-	cout << endl;
-
-	depthFirstSearch(adjMatrix2);
-	cout << endl;
-
-	breadthFirstSearch(adjMatrix2);
-	cout << endl;
-
-	adjMatrix3[0] = { 0, 0, 0, 0, 1, 0, 0, 10, 0, 0};
-	adjMatrix3[1] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0};
-	adjMatrix3[2] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	adjMatrix3[3] = { 4, 0, 0, 0, 0, 0, 0, 1, 0, 0};
-	adjMatrix3[4] = { 0, 0, 0, 0, 0, 3, 0, 0, 0, 0};
-	adjMatrix3[5] = { 0, 1, 3, 0, 0, 0, 7, 0, 1, 0};
-	adjMatrix3[6] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    adjMatrix3[7] = { 0, 0, 0, 0, 5, 0, 0, 0, 9, 0};
-    adjMatrix3[8] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 2};
-    adjMatrix3[9] = { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
-
-	Print(adjMatrix3);
-
-	*/
 	
 
 	return 0;
@@ -248,7 +202,7 @@ void DFS(ListOfLists<T> G, vector<int> &num, int pos, int &count, vector<edge<T>
 	for (int i = 0; i < G.size(); i++) {
 		T vert = Adj[i]; // save the value in the adjacent node list
 
-		if (vert && (num[i] == 0 || num[i] == (i+1))) { // if there is a node and we either reached the end or num has no value in this position
+		if (vert && num[i] == 0) { // if there is a node and we either reached the end or num has no value in this position
 			E.push_back( {pos, i});
 			DFS(G, num, i, count, E);
 		}
@@ -277,7 +231,7 @@ void breadthFirstSearch(ListOfLists<T> G) {
 			queue.pop_front();
 			vector<T> Adj = G[vert]; // save the vector at this vertex position
 			for (int i = 0; i < Adj.size(); i++) {
-				if ((num[i] == 0 || num[i] == (i+1)) && Adj[i]) {
+				if (num[i] == 0 && Adj[i]) {
 					num[i] = count++;
 					queue.push_back(i);
 					E.push_back( { vert , i});
@@ -427,6 +381,27 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 	return solpath;
 }
 
+/*
+vector<int> KruskalAlgorithm(ListOfLists<int> G) {
+	ListOfLists<int> MST;
+	ListOfLists<int> MST_test;
+	ListOfLists<int> H = G;
+	sort(H.begin(), H.end());
+	int vcount = vertexList(H).size();
+
+	for (int i = 0; i < H.size() && MST.size() < vcount - 1; i++) {
+		wedge<T> e = H[i];
+		MST_test = MST;
+		MST_test.push_back(e);
+
+		if (!detectCycles(MST_test)) {
+			MST = MST_test;
+		}
+	}
+	return MST;
+}
+*/
+
 //Prints the ListOfLists
 template<class T>
 void Print(ListOfLists<T> L) {
@@ -451,16 +426,23 @@ void loadMatrix(ListOfLists<int> &list)
 		vector<int> tempL;
 		string line = "";
 		int temp = 0;
-        while(!InFile1.eof()){
-			getline(InFile1, line);
-			istringstream instream(line);
-			while(instream>>temp){
+		int numVect = 0;
+		while(getline(InFile1, line)){
+			numVect++;
+		}
+		InFile1.close();
+		ifstream InFile1(filename1);// open the file for input
+		for(int i = 0; i<numVect && !InFile1.eof(); i++){
+			for(int j = 0; j<numVect; j++){
+				InFile1>>temp;
 				tempL.push_back(temp);
 			}
+			InFile1.ignore(256, '\n');
 			list.push_back(tempL);
 			tempL.clear();
 		}
     }else{
         cerr<<"Adjacency Matrix file is needed to proceed, exiting\n";
     }
+    InFile1.close();
 }
