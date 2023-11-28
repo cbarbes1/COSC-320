@@ -92,6 +92,8 @@ void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &c
 
 vector<int> KruskalAlgorithm(ListOfLists<int> G);
 
+ListOfLists<int> toAdjMatrix(vector<wedge<int>> G);
+
 void div(){
 	cout << "\n---------------------------------\n\n";
 }
@@ -385,12 +387,17 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 vector<int> KruskalAlgorithm(ListOfLists<int> G) {
 	ListOfLists<int> MST;
 	ListOfLists<int> MST_test;
-	ListOfLists<int> H = G;
-	sort(H.begin(), H.end());
-	int vcount = vertexList(H).size();
+	vector<wedge<int>> H;
+	int vcount = G.size();
+
+	for(int i = 0; i<G.size(); i++){
+		for(int j = 0; j<G.size(); j++){
+			H.push_back({i, j, G[i][j]});
+		}
+	}
 
 	for (int i = 0; i < H.size() && MST.size() < vcount - 1; i++) {
-		wedge<T> e = H[i];
+		wedge<int> e = H[i];
 		MST_test = MST;
 		MST_test.push_back(e);
 
