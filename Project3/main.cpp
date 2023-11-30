@@ -383,7 +383,7 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 	return solpath;
 }
 
-
+/*
 vector<int> KruskalAlgorithm(ListOfLists<int> G) {
 	ListOfLists<int> MST;
 	ListOfLists<int> MST_test;
@@ -407,6 +407,7 @@ vector<int> KruskalAlgorithm(ListOfLists<int> G) {
 	}
 	return MST;
 }
+*/
 
 //Prints the ListOfLists
 template<class T>
