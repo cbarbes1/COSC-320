@@ -90,9 +90,8 @@ bool detectCycles(ListOfLists<int> G);
 
 void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle);
 
-vector<int> KruskalAlgorithm(ListOfLists<int> G);
+ListOfLists<int> KruskalAlgorithm(ListOfLists<int> G);
 
-ListOfLists<int> findMinEdge(ListOfLists<int> G);
 
 void div(){
 	cout << "\n---------------------------------\n\n";
@@ -101,7 +100,7 @@ void div(){
 int main() {
 
 	int type = 0;
-	cout<<"Please enter what algorithm to run: (0: Depth First, 1: Breadth First, 3: Dijkstras, 4: Ford's, 5: Cycle Detection, )";
+	cout<<"Please enter what algorithm to run: (0: Depth First, 1: Breadth First, 2: Dijkstras, 3: Ford's, 4: Cycle Detection, 5: Kruskals Min spanning tree)";
 	cin>>type;
 
 	ListOfLists<int> graphAdj;
@@ -124,7 +123,7 @@ int main() {
 	}else if(type == 1){
 		breadthFirstSearch(graphAdj);
 		cout << endl;
-	}else if(type == 3){
+	}else if(type == 2){
 		vector<double> weightVect = DijkstraAlgorithm(graphAdj, 3);
 
 		for(unsigned int i = 0; i<weightVect.size(); i++){
@@ -142,7 +141,7 @@ int main() {
 		for(unsigned int i = 0; i<path2.size(); i++)
 			cout<<static_cast<char>('a'+path2[i])<<" ";
 		cout<<endl;
-	}else if(type == 4){
+	}else if(type == 3){
 		int startingNode = 0;
 		int toNode1 = 0;
 		int toNode2 = 0;
@@ -153,17 +152,19 @@ int main() {
 		for(unsigned int i = 0; i<weightVect.size(); i++){
 			cout<<static_cast<char>('a'+i)<<" : "<<weightVect[i]<<endl;
 		}
-	}else if(type == 5){
+	}else if(type == 4){
 		if(detectCycles(graphAdj)){
 			cout<<"Cycle Detected in the graph"<<endl;
 		}else{
 			cout<<"No Cycle Detected"<<endl;
 		}
+	}else if(type == 5){
+		ListOfLists<int> tree = KruskalAlgorithm(graphAdj);
+		depthFirstSearch(tree);
+		Print(tree);
 	}else if(type == 6){
 
-	}else if(type == 7){
-
-	}else if(type==8){
+	}else if(type==7){
 
 	}else{
 		cout<<"Invalid Selection"<<endl;
@@ -384,21 +385,44 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 }
 
 
-vector<int> KruskalAlgorithm(ListOfLists<int> G) {
+ListOfLists<int> KruskalAlgorithm(ListOfLists<int> G) {
 	ListOfLists<int> MST(G.size(), G.size());
 	ListOfLists<int> MST_test(G.size(), G.size());
-	ListOfLists<int> H = G;
-	int vcount = G.size();
+	vector<pair<int, pair<int, int>>> H;
 
-	for (int i = 0; i < H.size() && MST.size() < vcount - 1; i++) {
-		 e = getMinNode;
+	for(int i = 0; i<G.size(); i++){
+		for(int j = i; j<G.size(); j++){
+			MST[i][j] = 0;
+			MST_test[i][j] = 0;
+			MST[j][i] = 0;
+			MST_test[j][i] = 0;
+			if(G[i][j]!=0){
+				pair<int, int> tmp;
+				tmp.first = i;
+				tmp.second = j;
+				H.push_back({G[i][j], tmp});
+			}
+		}
+	}
+	int treeSize = 0;
+
+	sort(H.begin(), H.end());
+
+	for (int i = 0; i < H.size() && treeSize < G.size() - 1; i++) {
+		pair<int, int> e = H[i].second;
+		cout<<e.first<<" "<<e.second<<endl;
 		MST_test = MST;
-		MST_test.push_back(e);
+		cout<<G[e.first][e.second]<<endl;
+		MST_test[e.first][e.second] = G[e.first][e.second];
+		MST_test[e.second][e.first] = G[e.first][e.second];
 
 		if (!detectCycles(MST_test)) {
 			MST = MST_test;
+			treeSize++;
 		}
+		Print(MST_test);
 	}
+	cout<<"Tree Size: "<<treeSize<<endl;
 	return MST;
 }
 
@@ -445,17 +469,4 @@ void loadMatrix(ListOfLists<int> &list)
         cerr<<"Adjacency Matrix file is needed to proceed, exiting\n";
     }
     InFile1.close();
-}
-
-pair<int, int> findMinEdge(ListOfLists<int> G)
-{
-	pair<int, int> min(0, 0);
-	for(int i = 0; i<G.size(); i++){
-		for(int j = 0; j<G.size(); j++)
-			if(G[i][j]<G[min.first][min.second]){
-				min.first = i;
-				min.second = j;
-			}
-	}
-	return min;
 }
