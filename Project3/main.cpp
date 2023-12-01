@@ -92,7 +92,7 @@ void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &c
 
 vector<int> KruskalAlgorithm(ListOfLists<int> G);
 
-ListOfLists<int> toAdjMatrix(vector<wedge<int>> G);
+ListOfLists<int> findMinEdge(ListOfLists<int> G);
 
 void div(){
 	cout << "\n---------------------------------\n\n";
@@ -383,21 +383,15 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 	return solpath;
 }
 
-/*
+
 vector<int> KruskalAlgorithm(ListOfLists<int> G) {
-	ListOfLists<int> MST;
-	ListOfLists<int> MST_test;
-	vector<wedge<int>> H;
+	ListOfLists<int> MST(G.size(), G.size());
+	ListOfLists<int> MST_test(G.size(), G.size());
+	ListOfLists<int> H = G;
 	int vcount = G.size();
 
-	for(int i = 0; i<G.size(); i++){
-		for(int j = 0; j<G.size(); j++){
-			H.push_back({i, j, G[i][j]});
-		}
-	}
-
 	for (int i = 0; i < H.size() && MST.size() < vcount - 1; i++) {
-		wedge<int> e = H[i];
+		 e = getMinNode;
 		MST_test = MST;
 		MST_test.push_back(e);
 
@@ -407,7 +401,6 @@ vector<int> KruskalAlgorithm(ListOfLists<int> G) {
 	}
 	return MST;
 }
-*/
 
 //Prints the ListOfLists
 template<class T>
@@ -452,4 +445,17 @@ void loadMatrix(ListOfLists<int> &list)
         cerr<<"Adjacency Matrix file is needed to proceed, exiting\n";
     }
     InFile1.close();
+}
+
+pair<int, int> findMinEdge(ListOfLists<int> G)
+{
+	pair<int, int> min(0, 0);
+	for(int i = 0; i<G.size(); i++){
+		for(int j = 0; j<G.size(); j++)
+			if(G[i][j]<G[min.first][min.second]){
+				min.first = i;
+				min.second = j;
+			}
+	}
+	return min;
 }
