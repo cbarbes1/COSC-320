@@ -1,6 +1,6 @@
-/* Author: Dr. Spickler 
- * Last Edited by : Harrison Colborne and Cole Barbes
- * Last Date Edited: 10/17/23
+/* Author: Cole Barbes
+ * Last Date Edited: 11/1/23
+ * Description: This is a main file to create and implement a graph algorithm library
  */
 #include <iostream>
 #include <vector>
@@ -26,42 +26,7 @@ public:
 	}
 };
 
-template<class T>
-class wedge {
-public:
-	T from, to;
-	double weight;
-
-	wedge(T f, T t, double w = 0) {
-		from = f;
-		to = t;
-		weight = w;
-	}
-
-	friend ostream& operator <<(ostream &strm, const wedge &obj) {
-		strm << obj.from << " -> " << obj.to << " : " << obj.weight;
-		return strm;
-	}
-};
-
-template<class T>
-class wnode {
-public:
-	T name;
-	double weight;
-
-	wnode(T t, double w = 0) {
-		name = t;
-		weight = w;
-	}
-
-	friend ostream& operator <<(ostream &strm, const wnode &obj) {
-		strm << obj.name << " : " << obj.weight;
-		return strm;
-	}
-
-};
-
+// Prototypes of each function
 int findMinWnodePos(vector<double> &);
 
 template<class T>
@@ -88,10 +53,15 @@ void loadMatrix(ListOfLists<int>&);
 
 bool detectCycles(ListOfLists<int> G);
 
-void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle);
+void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle, int parent);
 
 ListOfLists<int> KruskalAlgorithm(ListOfLists<int> G);
 
+/*
+ListOfLists<int> BoruvkaAlgorithm(ListOfLists<int> G);
+
+ListOfLists<int> JarnikPrimAlgorithm(ListOfLists<int> G);
+*/
 
 void div(){
 	cout << "\n---------------------------------\n\n";
@@ -99,14 +69,17 @@ void div(){
 
 int main() {
 
+	// ask the user for which algorithm to run
 	int type = 0;
 	cout<<"Please enter what algorithm to run: (0: Depth First, 1: Breadth First, 2: Dijkstras, 3: Ford's, 4: Cycle Detection, 5: Kruskals Min spanning tree)";
 	cin>>type;
 
+	// create the graph using the load function which asks the user for which file to use using tiny file dialogs
 	ListOfLists<int> graphAdj;
 	loadMatrix(graphAdj);
 	cout<<"  ";
 
+	// Print the adjacency matrix
 	for(int i = 0; i<graphAdj.size(); i++)
 		cout<<static_cast<char>('a'+i)<<" ";
 	cout<<endl;
@@ -124,18 +97,22 @@ int main() {
 		breadthFirstSearch(graphAdj);
 		cout << endl;
 	}else if(type == 2){
+		// graph weight vector from dijkstras
 		vector<double> weightVect = DijkstraAlgorithm(graphAdj, 3);
 
+		// print the weights
 		for(unsigned int i = 0; i<weightVect.size(); i++){
 			cout<<static_cast<char>('a'+i)<<" : "<<weightVect[i]<<endl;
 		}
 
+		// find the path given the start
 		vector<int> path1 = findPath(graphAdj, 3, 6, weightVect[6]);
 
 		for(unsigned int i = 0; i<path1.size(); i++)
 			cout<<static_cast<char>('a'+path1[i])<<" ";
 		cout<<endl;
 		
+		// print path of different start
 		vector<int> path2 = findPath(graphAdj, 3, 2, weightVect[2]);
 
 		for(unsigned int i = 0; i<path2.size(); i++)
@@ -145,20 +122,24 @@ int main() {
 		int startingNode = 0;
 		int toNode1 = 0;
 		int toNode2 = 0;
-		cout<<"Enter a node to start from: ";
+		cout<<"Enter a node to start from: 0-n numerical node names!";
 		cin>>startingNode;
+		// start the fords algorithm from
 		vector<double> weightVect = FordAlgorithm(graphAdj, startingNode);
 
+		// print the weights
 		for(unsigned int i = 0; i<weightVect.size(); i++){
 			cout<<static_cast<char>('a'+i)<<" : "<<weightVect[i]<<endl;
 		}
 	}else if(type == 4){
+		// detect whether the graph has a cycle
 		if(detectCycles(graphAdj)){
 			cout<<"Cycle Detected in the graph"<<endl;
 		}else{
 			cout<<"No Cycle Detected"<<endl;
 		}
 	}else if(type == 5){
+		// use the requested algorithm to find min spanning tree
 		ListOfLists<int> tree = KruskalAlgorithm(graphAdj);
 		depthFirstSearch(tree);
 		Print(tree);
@@ -181,6 +162,7 @@ void depthFirstSearch(ListOfLists<T> G) {
 	vector<edge<T>> E;
 	int count = 1;
 
+	// create number vector
 	for (int i = 0; i < G.size(); i++)
 		num.push_back(0);
 
@@ -257,7 +239,11 @@ int findMinWnodePos(vector<double> &nodes, vector<int> &check) {
 	return minnodepos;
 }
 
-
+/*
+ * Fords algorithm to find the minimum path cost
+ * Parameters: The graph as an adjacency matrix, and the start
+ * Return: the vector of the weights at each node
+ */
 vector<double> FordAlgorithm(ListOfLists<int> G, int start) {
 	vector<double> nodes;
 
@@ -265,15 +251,18 @@ vector<double> FordAlgorithm(ListOfLists<int> G, int start) {
 	double max = 1E100; // DBL_MAX;
 	int v = 0;
 
+	// fill the array with infinity
 	for(unsigned int i = 0; i<G.size(); i++)
 		nodes.push_back(max);
 
+	// set the starting node to 0
 	nodes[start] = 0;
 
 	bool finished = false;
 	while (!finished) {
 		finished = true;
 
+		// traverse through the graph and if there is a node then check if the weight is minimum
 		for (int j = 0; j < G.size(); j++) {
 			for(int k = 0; k < G.size(); k++){
 				if (G[j][k] != 0 && nodes[k] > nodes[j] + G[j][k]) {
@@ -287,6 +276,11 @@ vector<double> FordAlgorithm(ListOfLists<int> G, int start) {
 	return nodes;
 }
 
+/*
+ * Dijkstras algorithm to find the minimum path
+ * Paramters: The graph as an adjacency matrix and the start
+ * return the vector of weights
+ */
 vector<double> DijkstraAlgorithm(ListOfLists<int> adjMatrix, int start) {
 	vector<double> nodes;
 	vector<int> tobechecked;
@@ -294,23 +288,26 @@ vector<double> DijkstraAlgorithm(ListOfLists<int> adjMatrix, int start) {
 	double max = 1E100; // DBL_MAX;
 	int v = 0;
 
+	// fill with max
 	for(unsigned int i = 0; i<adjMatrix.size(); i++)
 		nodes.push_back(max);
 
+	// set the start
 	nodes[start] = 0;
 
+	// fill to be checked with all nodes
 	for (unsigned int i = 0; i < adjMatrix.size(); i++)
 		tobechecked.push_back(i);
 
 	
 	while (!tobechecked.empty()) {
-		v = findMinWnodePos(nodes, tobechecked);
-		int tmp = tobechecked[v];
-		tobechecked.erase(tobechecked.begin() + v);
+		v = findMinWnodePos(nodes, tobechecked); // find the minimum node position
+		int tmp = tobechecked[v]; // save from to be checked
+		tobechecked.erase(tobechecked.begin() + v); // erase the node from to be checked
 		v = tmp;
 		double node = nodes[v];
 
-		for (int j = 0; j < adjMatrix.size(); j++){
+		for (int j = 0; j < adjMatrix.size(); j++){// traverse the matrix at the given node and look for cheapest path
 				if (adjMatrix[v][j] != 0 && find(tobechecked.begin(), tobechecked.end(), j)!=tobechecked.end()){
 					if(nodes[j] > node + adjMatrix[v][j]) {
 						nodes[j] = node + adjMatrix[v][j];
@@ -328,12 +325,15 @@ bool detectCycles(ListOfLists<int> G) {
 	int count = 1;
 	bool cycle = false;
 
-	for (int i = 0; i < G.size(); i++)
+	// fill check array with 0s indicating that that node has been used
+	for (int i = 0; i < G.size(); i++){
 		num.push_back(0);
+	}
 
+	// while there is a node with the value of 0 keep calling DFS
 	while (find(num.begin(), num.end(), 0) < num.end()) {
 		int pos = find(num.begin(), num.end(), 0) - num.begin();
-		cycleDFS(G, num, pos, count, cycle);
+		cycleDFS(G, num, pos, count, cycle, -1);
 	}
 
 // Probably overkill but have seen this in print.
@@ -348,22 +348,31 @@ bool detectCycles(ListOfLists<int> G) {
 	return cycle;
 }
 
-void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle) {
+/*
+ * recursively loop for a cycle in the given graph
+ * Parameters: the graph, the num vector, the position, the count of step, the cycle checker, and the parent node
+ * return: none
+ */
+void cycleDFS(ListOfLists<int> G, vector<int> &num, int pos, int &count, bool &cycle, int parent) {
 	vector<int> Adj = G[pos];
 	num[pos] = count++;
 	int inf = 1000000000;
 
+	// find a node which has made it out of the DFS that is not the parent
 	for (int i = 0; i < Adj.size(); i++) {
 		int vert = Adj[i];
-		if (vert!=0 && num[i] == 0) {
-			cycleDFS(G, num, i, count, cycle);
-		}else if (vert!=0 && num[i] != inf)
+		if (vert!=0 && num[i] == 0){
+			cycleDFS(G, num, i, count, cycle, pos);
+		}else if (vert!=0 && num[i] != inf && parent!=i)
 			cycle = true;
 	}
 	
 	num[pos] = inf;
 }
 
+/*
+ * go through the matrix recursively and find the next node that satsfies the cost
+ */
 void findPathRec(ListOfLists<int> G, int start, int end, double cost, double totalcost, vector<int> path, vector<int> &solpath) {
 	double tol = 0.000001; // For roundoff error.
 	path.push_back(start);
@@ -376,6 +385,9 @@ void findPathRec(ListOfLists<int> G, int start, int end, double cost, double tot
 				findPathRec(G, j, end, cost + G[start][j], totalcost, path, solpath);
 }
 
+/*
+ * setup the recursive call for the find path function
+ */
 vector<int> findPath(ListOfLists<int> G, int start, int end,
 		double totalcost) {
 	vector<int> path;
@@ -384,12 +396,17 @@ vector<int> findPath(ListOfLists<int> G, int start, int end,
 	return solpath;
 }
 
-
+/*
+ * Kruskals algorithm to find the minimum spanning tree
+ * parameters: the graph
+ * return the MST tree
+ */
 ListOfLists<int> KruskalAlgorithm(ListOfLists<int> G) {
 	ListOfLists<int> MST(G.size(), G.size());
 	ListOfLists<int> MST_test(G.size(), G.size());
 	vector<pair<int, pair<int, int>>> H;
 
+	// setup the needed trees and the list of each edge
 	for(int i = 0; i<G.size(); i++){
 		for(int j = i; j<G.size(); j++){
 			MST[i][j] = 0;
@@ -404,27 +421,49 @@ ListOfLists<int> KruskalAlgorithm(ListOfLists<int> G) {
 			}
 		}
 	}
-	int treeSize = 0;
+	int treeSize = 0; // set the size of the tree to 0
 
-	sort(H.begin(), H.end());
+	sort(H.begin(), H.end()); // sort the list of edges
 
+	// loop through the list until the end or the tree is large enough
 	for (int i = 0; i < H.size() && treeSize < G.size() - 1; i++) {
+		// get the min node
 		pair<int, int> e = H[i].second;
-		cout<<e.first<<" "<<e.second<<endl;
+		// set the test tree
 		MST_test = MST;
-		cout<<G[e.first][e.second]<<endl;
+		// save the new node into the tree
 		MST_test[e.first][e.second] = G[e.first][e.second];
 		MST_test[e.second][e.first] = G[e.first][e.second];
 
-		if (!detectCycles(MST_test)) {
+		if (!detectCycles(MST_test)) { // if no cycle then add to the tree
 			MST = MST_test;
 			treeSize++;
 		}
-		Print(MST_test);
 	}
-	cout<<"Tree Size: "<<treeSize<<endl;
 	return MST;
 }
+/*
+ListOfLists<int> BoruvkaAlgorithm(ListOfLists<int> G)
+{
+	vector<ListOfLists<int>> trees;
+	for(int i = 0; i<G.size(); i++){
+		ListOfLists<int> tmp;
+		tmp.addRow();
+		trees.push_back(tmp);
+	}
+
+	while(trees.size() > 1){
+		for(ListOfLists<int> t : trees){
+
+		}
+	}
+}
+
+ListOfLists<int> JarnikPrimAlgorithm(ListOfLists<int> G)
+{
+
+}
+*/
 
 //Prints the ListOfLists
 template<class T>
@@ -439,6 +478,10 @@ void Print(ListOfLists<T> L) {
 	}
 }
 
+/*
+ * Load the files of the given type
+ * Parameters: the list to save it into
+ */
 void loadMatrix(ListOfLists<int> &list)
 {
 	// get a file to use in n gram key calculation
@@ -451,11 +494,13 @@ void loadMatrix(ListOfLists<int> &list)
 		string line = "";
 		int temp = 0;
 		int numVect = 0;
+		// get the line number
 		while(getline(InFile1, line)){
 			numVect++;
 		}
 		InFile1.close();
 		ifstream InFile1(filename1);// open the file for input
+		// go through each line and fill the adjacency matrix with values
 		for(int i = 0; i<numVect && !InFile1.eof(); i++){
 			for(int j = 0; j<numVect; j++){
 				InFile1>>temp;
