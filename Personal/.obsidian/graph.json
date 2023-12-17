@@ -1,0 +1,30 @@
+{
+  "collapse-filter": false,
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "section:(Data Structures And Algorithms))",
+      "color": {
+        "a": 1,
+        "rgb": 14701138
+      }
+    }
+  ],
+  "collapse-display": true,
+  "showArrow": false,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 0.862833658854167,
+  "lineSizeMultiplier": 0.873201497395833,
+  "collapse-forces": false,
+  "centerStrength": 1,
+  "repelStrength": 20,
+  "linkStrength": 1,
+  "linkDistance": 30,
+  "scale": 1.9726591607694441,
+  "close": true
+}
